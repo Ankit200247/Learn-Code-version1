@@ -1,0 +1,156 @@
+/* Daily Challenge Calendar */
+.daily-challenge-calendar {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  border-radius: 12px;
+}
+
+.daily-challenge-calendar button {
+  cursor: pointer;
+}
+/* Daily Challenge Calendar */
+
+.daily-calendar {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #e0e7ff;
+  border-radius: 12px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.daily-calendar-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.daily-calendar-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #6366f1;
+}
+
+.daily-calendar-header h3 {
+  margin: 6px 0;
+  font-size: 18px;
+}
+
+.daily-calendar-header p {
+  margin: 6px 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.daily-calendar-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+}
+
+.daily-calendar-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.daily-calendar-legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.legend-solved {
+  background: #22c55e;
+}
+
+.legend-today {
+  background: #818cf8;
+}
+
+.daily-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.daily-calendar-weekday {
+  padding: 8px 0;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.daily-calendar-date,
+.daily-calendar-empty {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.daily-calendar-date {
+  position: relative;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 13px;
+}
+
+.daily-calendar-date.is-solved {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.daily-calendar-date.is-today {
+  outline: 2px solid #818cf8;
+  font-weight: 700;
+}
+
+.daily-calendar-date small {
+  position: absolute;
+  right: 3px;
+  top: 2px;
+  font-size: 8px;
+}
+
+.daily-calendar-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 12px;
+}
+
+.daily-calendar-footer strong {
+  color: #4f46e5;
+}
+
+.daily-calendar-total {
+  margin-left: auto;
+  color: #64748b;
+}
+
+@media (max-width: 600px) {
+  .daily-calendar {
+    padding: 10px;
+  }
+
+  .daily-calendar-grid {
+    gap: 3px;
+  }
+
+  .daily-calendar-date,
+  .daily-calendar-empty {
+    min-height: 32px;
+  }
+}
