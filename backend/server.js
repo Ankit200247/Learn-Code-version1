@@ -24,11 +24,18 @@ const PORT = Number(process.env.PORT) || 5000;
 // MIDDLEWARE
 // --------------------------------------------------
 
+const allowedOrigins = [
+"http://localhost:5173",
+"https://learn-code-frontend-xu8j.onrender.com"
+];
+
 app.use(
-  cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-  })
+cors({
+origin: allowedOrigins,
+credentials: true
+})
 );
+
 
 app.use(express.json({ limit: "1mb" }));
 
