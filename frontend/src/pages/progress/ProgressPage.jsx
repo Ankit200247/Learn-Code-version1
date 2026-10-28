@@ -211,7 +211,7 @@ export default function ProgressPage() {
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <span className="inline-flex rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-bold text-violet-700">
-            TECHPATH AI · ANALYTICS
+            Learn Code · ANALYTICS
           </span>
 
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">

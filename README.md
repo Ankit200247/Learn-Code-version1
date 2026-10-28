@@ -44,5 +44,5 @@ Open the local URL printed by Vite, usually `http://localhost:5173`.
 
 - The project code has been preserved as much as possible. The `backend/server.js` Git conflict sections were resolved by keeping the existing `HEAD` implementation and removing the duplicated conflicting branch.
 - The original `server/.env` was intentionally not copied into this archive to avoid bundling private API/database credentials. Copy its values into the new `backend/.env` yourself, especially `MONGODB_URI`, `JWT_SECRET`, and your Gemini key.
-- The frontend currently uses `http://localhost:5000` for API requests, so run the backend locally while testing.
+- The frontend currently uses `http://https://leancode.onrender.com` for API requests, so run the backend locally while testing.
 - This archive does not include `node_modules`; `npm install` recreates dependencies for your machine.

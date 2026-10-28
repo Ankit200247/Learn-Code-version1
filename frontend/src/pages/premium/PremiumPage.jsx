@@ -148,7 +148,7 @@ export default function PremiumPage() {
 
   const faqs = [
     {
-      question: "Can I start using TechPath AI for free?",
+      question: "Can I start using Learn Code for free?",
       answer:
         "Yes. The Free plan is designed to help you explore learning resources, practice basic questions, and begin tracking your learning progress.",
     },
@@ -160,7 +160,7 @@ export default function PremiumPage() {
     {
       question: "Does Premium guarantee a job or placement?",
       answer:
-        "No. TechPath AI is a learning and preparation platform. Your placement outcome depends on your preparation, performance, eligibility, and the employer's recruitment process.",
+        "No. Learn Code is a learning and preparation platform. Your placement outcome depends on your preparation, performance, eligibility, and the employer's recruitment process.",
     },
     {
       question: "Are the prices shown live subscription prices?",
@@ -184,7 +184,7 @@ export default function PremiumPage() {
 
         <div className="relative mx-auto max-w-3xl">
           <span className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-4 py-2 text-xs font-semibold text-indigo-300">
-            ✦ TECHPATH AI MEMBERSHIP
+            ✦ Learn Code MEMBERSHIP
           </span>
 
           <h1 className="mt-6 text-3xl font-bold leading-tight sm:text-5xl">

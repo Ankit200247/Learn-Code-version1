@@ -4,8 +4,8 @@ export default function ProtectedRoute() {
   const location = useLocation();
 
   const isAuthenticated =
-    sessionStorage.getItem("TechPath AIVerified") === "true" &&
-    Boolean(sessionStorage.getItem("TechPath AIEmail"));
+    sessionStorage.getItem("Learn CodeVerified") === "true" &&
+    Boolean(sessionStorage.getItem("Learn CodeEmail"));
 
   if (!isAuthenticated) {
     return (

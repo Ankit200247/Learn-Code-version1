@@ -4,7 +4,7 @@ import Editor from "@monaco-editor/react";
 import axios from "axios";
 
 const API_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:5000"
+  import.meta.env.VITE_API_URL || "http://https://leancode.onrender.com"
 ).replace(/\/$/, "");
 
 const LANGUAGES = {
@@ -886,7 +886,7 @@ export default function AiEditorPage() {
             <span>
               {problem ? problem.topic : "General programming"}
             </span>
-            <span>TechPath AI</span>
+            <span>Learn Code</span>
           </div>
         </aside>
 

@@ -102,24 +102,24 @@ const STATS = [
 
 const FAQS = [
   {
-    question: "What is TechPath AI?",
+    question: "What is Learn Code?",
     answer:
-      "TechPath AI is a learning platform concept designed to bring programming lessons, coding practice, AI-assisted learning, progress tracking, and placement preparation together.",
+      "Learn Code is a learning platform concept designed to bring programming lessons, coding practice, AI-assisted learning, progress tracking, and placement preparation together.",
   },
   {
-    question: "Can beginners use TechPath AI?",
+    question: "Can beginners use Learn Code?",
     answer:
       "Yes. The Beginner Zone is designed to help learners start with programming fundamentals and gradually move towards more challenging concepts.",
   },
   {
-    question: "Does TechPath AI support coding practice?",
+    question: "Does Learn Code support coding practice?",
     answer:
       "The platform includes a coding practice area and an editor interface. Actual code execution depends on the backend and Judge0 configuration being set up correctly.",
   },
   {
-    question: "Will TechPath AI guarantee a placement?",
+    question: "Will Learn Code guarantee a placement?",
     answer:
-      "No platform can guarantee a placement. TechPath AI is intended to support preparation through learning, practice, revision, and progress tracking.",
+      "No platform can guarantee a placement. Learn Code is intended to support preparation through learning, practice, revision, and progress tracking.",
   },
 ];
 
@@ -168,7 +168,7 @@ function LandingNavbar() {
         <Link
           to="/"
           className="flex shrink-0 items-center gap-3"
-          aria-label="TechPath AI home"
+          aria-label="Learn Code home"
         >
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-lg font-bold shadow-lg shadow-indigo-950/30">
             T
@@ -288,7 +288,7 @@ function LandingFooter() {
       </div>
 
       <div className="border-t border-slate-900 px-4 py-4 text-center text-xs text-slate-600">
-        © {new Date().getFullYear()} TechPath AI. Keep learning.
+        © {new Date().getFullYear()} Learn Code. Keep learning.
       </div>
     </footer>
   );
@@ -703,7 +703,7 @@ export default function LandingPage() {
               </p>
 
               <h2 className="mt-4 text-3xl font-bold">
-                Questions about TechPath AI
+                Questions about Learn Code
               </h2>
             </div>
 

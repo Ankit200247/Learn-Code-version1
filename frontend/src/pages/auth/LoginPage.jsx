@@ -67,7 +67,7 @@ Back to home </Link>
       </div>
 
       <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-indigo-400">
-        TechPath AI
+        Learn Code
       </p>
 
       <h1 className="text-3xl font-bold tracking-tight">
@@ -150,7 +150,7 @@ Back to home </Link>
       </div>
 
       <p className="mt-6 text-center text-sm text-slate-400">
-        New to TechPath AI?{" "}
+        New to Learn Code?{" "}
         <Link
           to="/signup"
           className="font-semibold text-indigo-400 transition hover:text-indigo-300"

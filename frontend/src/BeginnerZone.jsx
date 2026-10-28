@@ -982,7 +982,7 @@ const mcqs = MCQS[activeSubject] || [];
       setRunning(true);
       setGuidedPracticeFeedback("Submitting your Java code to the compiler…");
       try {
-        const response = await axios.post("http://localhost:5000/api/run", {
+        const response = await axios.post("http://https://leancode.onrender.com/api/run", {
           code: typed,
           language: "java",
           input: "",
@@ -1053,7 +1053,7 @@ const mcqs = MCQS[activeSubject] || [];
     }
     setRunning(true); setRunOutput("Running your code…");
     try {
-      const response = await axios.post("http://localhost:5000/api/run", { code, language, input: customInput });
+      const response = await axios.post("http://https://leancode.onrender.com/api/run", { code, language, input: customInput });
       setRunOutput(response.data.output || response.data.error || (response.data.success ? "Program finished successfully." : "Execution failed."));
       if (response.data.success) setSaved((prev) => ({ ...prev, completed: { ...(prev.completed || {}), [`${language}:${activeProgram.topic}`]: true } }));
     } catch (error) {

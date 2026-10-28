@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 
 const API_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:5000"
+  import.meta.env.VITE_API_URL || "http://https://leancode.onrender.com"
 ).replace(/\/$/, "");
 
 const CONVERSATIONS_KEY = "techpath_ai_conversations";
@@ -1009,7 +1009,7 @@ export default function AiAssistantPage({ onNavigate }) {
 
               <div className="min-w-0">
                 <h2 className="truncate text-sm font-bold text-slate-900">
-                  {activeChat?.title || "TechPath AI"}
+                  {activeChat?.title || "Learn Code"}
                 </h2>
 
                 <p className="mt-0.5 text-xs text-slate-500">
@@ -1127,7 +1127,7 @@ export default function AiAssistantPage({ onNavigate }) {
                     }`}
                   >
                     <span>
-                      {message.role === "user" ? "You" : "TechPath AI"} ·{" "}
+                      {message.role === "user" ? "You" : "Learn Code"} ·{" "}
                       {formatTime(message.timestamp)}
                     </span>
 

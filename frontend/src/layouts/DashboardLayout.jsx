@@ -143,7 +143,7 @@ function BrandLogo() {
     <Link
       to="/dashboard"
       className="flex min-w-0 items-center gap-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-400"
-      aria-label="TechPath AI dashboard"
+      aria-label="Learn Code dashboard"
     >
       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-200">
         <svg
@@ -230,7 +230,7 @@ export default function DashboardLayout() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const userEmail = sessionStorage.getItem("TechPath AIEmail") || "";
+  const userEmail = sessionStorage.getItem("Learn CodeEmail") || "";
   const pageTitle = getPageTitle(location.pathname);
 
   useEffect(() => {
@@ -258,8 +258,8 @@ export default function DashboardLayout() {
   }, [mobileMenuOpen]);
 
   function handleLogout() {
-    sessionStorage.removeItem("TechPath AIEmail");
-    sessionStorage.removeItem("TechPath AIVerified");
+    sessionStorage.removeItem("Learn CodeEmail");
+    sessionStorage.removeItem("Learn CodeVerified");
     localStorage.removeItem("token");
 
     navigate("/login", { replace: true });
@@ -442,7 +442,7 @@ export default function DashboardLayout() {
 
             <div className="min-w-0">
               <div className="hidden items-center gap-2 text-xs font-medium text-slate-400 sm:flex">
-                <span>TechPath AI</span>
+                <span>Learn Code</span>
                 <span>/</span>
                 <span className="truncate text-violet-600">{pageTitle}</span>
               </div>

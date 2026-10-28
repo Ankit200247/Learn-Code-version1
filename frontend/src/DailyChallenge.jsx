@@ -191,8 +191,15 @@ export default function DailyChallenge() {
     }
     setChallengeRunning(true); setChallengeOutput("Running your solution…");
     try {
-      const response = await axios.post("http://localhost:5000/api/run", { code: challengeCode, language: challengeLanguage, input: challengeInput || activeDailyChallenge.input });
-      const output = response.data.output ?? response.data.error ?? response.data.message ?? "No output returned.";
+      const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "https://leancode.onrender.com"
+).replace(/\/+$/, "");
+
+const response = await axios.post(`${API_BASE_URL}/api/run`, {
+  code: challengeCode,
+  language: challengeLanguage,
+  input: challengeInput || activeDailyChallenge.input
+});      const output = response.data.output ?? response.data.error ?? response.data.message ?? "No output returned.";
       setChallengeOutput(output);
       if (response.data.success && String(output).trim() === activeDailyChallenge.output.trim()) {
         const updated = { ...challengeCompleted, [todayKey]: { challengeId: activeDailyChallenge.id, title: activeDailyChallenge.title, points: 10, solvedAt: new Date().toISOString() } };

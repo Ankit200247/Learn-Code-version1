@@ -19,7 +19,7 @@ import BeginnerZone from "./BeginnerZone";
 import DailyChallenge from "./DailyChallenge";
 
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL || "http://https://leancode.onrender.com";
 
 const CODE_EXPLANATIONS = {
   java: {
@@ -7956,9 +7956,13 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
             <div className="my-auto w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 text-slate-900 shadow-2xl sm:p-8">
               <div className="mb-6 flex items-start justify-between">
                 <div>
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 text-xl font-bold text-white">
-                    C
-                  </div>
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center">
+  <img
+    src="/favicon.svg"
+    alt="Learn Code logo"
+    className="h-12 w-12 object-contain"
+  />
+</div>
 
                   <h2 className="text-2xl font-bold">
                     {authPage === "signup"
