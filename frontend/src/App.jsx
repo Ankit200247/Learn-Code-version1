@@ -19,7 +19,7 @@ import BeginnerZone from "./BeginnerZone";
 import DailyChallenge from "./DailyChallenge";
 
 
-const API_URL = "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const CODE_EXPLANATIONS = {
   java: {
