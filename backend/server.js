@@ -1536,7 +1536,7 @@ app.post("/api/ai/chat", async (req, res) => {
       .join("\n\n");
 
     const prompt = `
-You are TechPath AI, a helpful programming and learning assistant.
+You are Learn Code, a helpful programming and learning assistant.
 
 IMPORTANT CONVERSATION RULES:
 1. Maintain context from the entire supplied conversation.
@@ -1673,7 +1673,7 @@ app.post("/api/ai-feedback", async (req, res) => {
       : "No problem statement provided.";
 
     const prompt = `
-You are an expert programming mentor for TechPath AI.
+You are an expert programming mentor for Learn Code.
 
 PROGRAMMING LANGUAGE:
 ${language || "Unknown"}
@@ -1733,7 +1733,7 @@ app.get("/api/health", (_req, res) => {
     success: true,
 
     message:
-      "TechPath AI backend is running.",
+      "Learn Code backend is running.",
 
     aiConfigured:
       Boolean(GEMINI_API_KEY),
@@ -1801,7 +1801,7 @@ async function startServer() {
 
   app.listen(PORT, () => {
     console.log(
-      `\nTechPath AI backend running on http://localhost:${PORT}`
+      `\nLearn Code backend running on http://localhost:${PORT}`
     );
 
     console.log(
