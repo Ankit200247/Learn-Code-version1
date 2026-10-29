@@ -11,6 +11,7 @@ import nodemailer from "nodemailer";
 
 import User from "./models/User.js";
 import Progress from "./models/Progress.js";
+import LearningData from "./models/LearningData.js";
 
 dotenv.config();
 
@@ -739,6 +740,88 @@ app.get("/api/auth/me", requireAuth, async (req, res) => {
     });
   }
 });
+
+// --------------------------------------------------
+// GET USER LEARNING DATA
+// --------------------------------------------------
+app.get("/api/learning-data", requireAuth, async (req, res) => {
+  try {
+    if (!databaseReady(res)) return;
+
+    const data = await LearningData.findOne({
+      user: req.userId,
+    }).lean();
+
+    return res.json({
+  success: true,
+  exists: Boolean(data),
+  data: {
+    customRoadmaps: data?.customRoadmaps ?? [],
+    completedModules: data?.completedModules ?? [],
+    roadmapLearningState: data?.roadmapLearningState ?? {},
+    beginnerZoneData: data?.beginnerZoneData ?? {},
+    submissions: data?.submissions ?? {},
+  },
+});
+  } catch (error) {
+    console.error("Get learning data error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch learning data.",
+    });
+  }
+});
+
+// --------------------------------------------------
+// SAVE USER LEARNING DATA
+// --------------------------------------------------
+app.put("/api/learning-data", requireAuth, async (req, res) => {
+  try {
+    if (!databaseReady(res)) return;
+
+    const {
+      customRoadmaps,
+      completedModules,
+      roadmapLearningState,
+      beginnerZoneData,
+      submissions,
+    } = req.body || {};
+
+    const data = await LearningData.findOneAndUpdate(
+      { user: req.userId },
+      {
+        $set: {
+          user: req.userId,
+          ...(customRoadmaps !== undefined && { customRoadmaps }),
+          ...(completedModules !== undefined && { completedModules }),
+          ...(roadmapLearningState !== undefined && { roadmapLearningState }),
+          ...(beginnerZoneData !== undefined && { beginnerZoneData }),
+          ...(submissions !== undefined && { submissions }),
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+        runValidators: true,
+        setDefaultsOnInsert: true,
+      }
+    );
+
+    return res.json({
+      success: true,
+      message: "Learning data saved successfully.",
+    });
+  } catch (error) {
+    console.error("Save learning data error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to save learning data.",
+    });
+  }
+});
+
 // --------------------------------------------------
 // GET USER PROGRESS
 // --------------------------------------------------

@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import Editor from "@monaco-editor/react";
 import axios from "axios";
 import "./BeginnerZone.css";
+const API_URL = (
+  import.meta.env.VITE_API_URL || "https://leancode.onrender.com"
+).replace(/\/+$/, "");
 
 const LANGUAGES = [
   { id: "java", name: "Java", icon: "☕" },
@@ -21,6 +24,15 @@ const TOPICS = {
     "Strings",
     "OOP",
   ],
+  c: [
+  "Fundamentals",
+  "Variables & Data Types",
+  "Conditionals",
+  "Loops",
+  "Arrays",
+  "Strings",
+  "Functions",
+],
   cpp: [
     "Fundamentals",
     "Variables & Data Types",
@@ -833,6 +845,65 @@ function readSaved(storageKey) {
   try { return JSON.parse(localStorage.getItem(storageKey)) || {}; }
   catch { return {}; }
 }
+function mergeLearningData(localData = {}, serverData = {}) {
+  const local = localData || {};
+  const server = serverData || {};
+
+  const merged = {
+    ...server,
+    ...local,
+
+    // Preserve completed modules from both devices.
+    completed: {
+      ...(server.completed || {}),
+      ...(local.completed || {}),
+    },
+
+    // Preserve question attempts from both devices.
+    attempts: {
+      ...(server.attempts || {}),
+      ...(local.attempts || {}),
+    },
+
+    // Preserve guided learning progress.
+    guidedCompleted: {
+      ...(server.guidedCompleted || {}),
+      ...(local.guidedCompleted || {}),
+    },
+  };
+
+  // Merge roadmaps without duplicating the same roadmap ID.
+  const roadmapMap = new Map();
+
+  [
+    ...(Array.isArray(server.customRoadmaps)
+      ? server.customRoadmaps
+      : []),
+
+    ...(Array.isArray(local.customRoadmaps)
+      ? local.customRoadmaps
+      : []),
+  ].forEach((roadmap) => {
+    if (roadmap?.id != null) {
+      const previous = roadmapMap.get(String(roadmap.id));
+
+      roadmapMap.set(String(roadmap.id), {
+        ...previous,
+        ...roadmap,
+        completed: [
+          ...new Set([
+            ...(previous?.completed || []),
+            ...(roadmap.completed || []),
+          ]),
+        ],
+      });
+    }
+  });
+
+  merged.customRoadmaps = [...roadmapMap.values()];
+
+  return merged;
+}
 
 export default function BeginnerZone() {
   const storageKey = getUserStorageKey();
@@ -841,6 +912,7 @@ export default function BeginnerZone() {
   const [showPlacementQuestions, setShowPlacementQuestions] = useState(false);
   const [section, setSection] = useState("Guided Learning");
   const [saved, setSaved] = useState(() => readSaved(storageKey));
+  const [syncReady, setSyncReady] = useState(false);
   const [topicFilter, setTopicFilter] = useState("All topics");
   const [mcqIndex, setMcqIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -906,8 +978,157 @@ const mcqs = MCQS[activeSubject] || [];
   }), [completed, attempts]);
 
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify({ ...saved, customRoadmaps }));
-  }, [saved, customRoadmaps, storageKey]);
+  let cancelled = false;
+
+  async function loadLearningProgress() {
+    const localData = {
+      ...readSaved(storageKey),
+    };
+
+    const token = localStorage.getItem("token");
+
+    // Without login, continue using local storage.
+    if (!token) {
+      if (!cancelled) {
+        setSaved(localData);
+        setCustomRoadmaps(
+          Array.isArray(localData.customRoadmaps)
+            ? localData.customRoadmaps
+            : []
+        );
+        setSyncReady(true);
+      }
+
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/learning-data`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          timeout: 20000,
+        }
+      );
+
+      if (!response.data?.success) {
+        throw new Error("Unable to load learning progress.");
+      }
+
+      if (cancelled) return;
+
+      const serverData =
+        response.data?.data?.beginnerZoneData || {};
+
+      // Merge existing laptop/mobile data with server data.
+      const mergedData = mergeLearningData(
+        localData,
+        serverData
+      );
+
+      setSaved(mergedData);
+
+      setCustomRoadmaps(
+        Array.isArray(mergedData.customRoadmaps)
+          ? mergedData.customRoadmaps
+          : []
+      );
+
+      // Save merged data locally after successful loading.
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify(mergedData)
+      );
+    } catch (error) {
+      console.error(
+        "Learning progress sync error:",
+        error.response?.data || error.message
+      );
+
+      // Keep local data if the server is temporarily unavailable.
+      if (!cancelled) {
+        setSaved(localData);
+
+        setCustomRoadmaps(
+          Array.isArray(localData.customRoadmaps)
+            ? localData.customRoadmaps
+            : []
+        );
+      }
+    } finally {
+      if (!cancelled) {
+        setSyncReady(true);
+      }
+    }
+  }
+
+  loadLearningProgress();
+
+  return () => {
+    cancelled = true;
+  };
+}, [storageKey]);
+
+useEffect(() => {
+  // Never save before the initial load/merge finishes.
+  if (!syncReady) return;
+
+  const learningData = {
+    ...saved,
+    customRoadmaps,
+  };
+
+  // Save locally first.
+  try {
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify(learningData)
+    );
+  } catch (error) {
+    console.error("Local progress save error:", error);
+  }
+
+  const token = localStorage.getItem("token");
+
+  // Guest users can only save locally.
+  if (!token) return;
+
+  // Debounce requests so every small state change
+  // does not immediately trigger a network request.
+  const timer = setTimeout(async () => {
+    try {
+      await axios.put(
+        `${API_URL}/api/learning-data`,
+        {
+          beginnerZoneData: learningData,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          timeout: 20000,
+        }
+      );
+
+      console.log("Learning progress synced successfully.");
+    } catch (error) {
+      console.error(
+        "Could not sync learning progress:",
+        error.response?.data || error.message
+      );
+    }
+  }, 800);
+
+  return () => clearTimeout(timer);
+}, [
+  saved,
+  customRoadmaps,
+  storageKey,
+  syncReady,
+]);
+
 
   useEffect(() => {
     setCode(STARTER_CODE[language]);
@@ -982,7 +1203,7 @@ const mcqs = MCQS[activeSubject] || [];
       setRunning(true);
       setGuidedPracticeFeedback("Submitting your Java code to the compiler…");
       try {
-        const response = await axios.post("http://https://leancode.onrender.com/api/run", {
+        const response = await axios.post("https://leancode.onrender.com/api/run", {
           code: typed,
           language: "java",
           input: "",
@@ -1053,7 +1274,10 @@ const mcqs = MCQS[activeSubject] || [];
     }
     setRunning(true); setRunOutput("Running your code…");
     try {
-      const response = await axios.post("http://https://leancode.onrender.com/api/run", { code, language, input: customInput });
+      const response = await axios.post(
+  "https://leancode.onrender.com/api/run",
+  { code, language, input: customInput }
+);
       setRunOutput(response.data.output || response.data.error || (response.data.success ? "Program finished successfully." : "Execution failed."));
       if (response.data.success) setSaved((prev) => ({ ...prev, completed: { ...(prev.completed || {}), [`${language}:${activeProgram.topic}`]: true } }));
     } catch (error) {

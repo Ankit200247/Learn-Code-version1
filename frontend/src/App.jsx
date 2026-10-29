@@ -19,7 +19,9 @@ import BeginnerZone from "./BeginnerZone";
 import DailyChallenge from "./DailyChallenge";
 
 
-const API_URL = import.meta.env.VITE_API_URL || "http://https://leancode.onrender.com";
+const API_URL = (
+  import.meta.env.VITE_API_URL || "https://leancode.onrender.com"
+).replace(/\/+$/, "");
 
 const CODE_EXPLANATIONS = {
   java: {
