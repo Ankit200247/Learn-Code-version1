@@ -761,6 +761,8 @@ app.get("/api/learning-data", requireAuth, async (req, res) => {
     roadmapLearningState: data?.roadmapLearningState ?? {},
     beginnerZoneData: data?.beginnerZoneData ?? {},
     submissions: data?.submissions ?? {},
+    aiAssistantChats: data?.aiAssistantChats ?? [],
+    aiMentorChats: data?.aiMentorChats ?? [],
   },
 });
   } catch (error) {
@@ -781,12 +783,14 @@ app.put("/api/learning-data", requireAuth, async (req, res) => {
     if (!databaseReady(res)) return;
 
     const {
-      customRoadmaps,
-      completedModules,
-      roadmapLearningState,
-      beginnerZoneData,
-      submissions,
-    } = req.body || {};
+  customRoadmaps,
+  completedModules,
+  roadmapLearningState,
+  beginnerZoneData,
+  submissions,
+  aiAssistantChats,
+  aiMentorChats,
+} = req.body || {};
 
     const data = await LearningData.findOneAndUpdate(
       { user: req.userId },
@@ -798,6 +802,8 @@ app.put("/api/learning-data", requireAuth, async (req, res) => {
           ...(roadmapLearningState !== undefined && { roadmapLearningState }),
           ...(beginnerZoneData !== undefined && { beginnerZoneData }),
           ...(submissions !== undefined && { submissions }),
+          ...(aiAssistantChats !== undefined && { aiAssistantChats }),
+          ...(aiMentorChats !== undefined && { aiMentorChats }),
         },
       },
       {

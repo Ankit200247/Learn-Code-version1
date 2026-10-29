@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 
 const API_URL = (
-  import.meta.env.VITE_API_URL || "http://https://leancode.onrender.com"
+  import.meta.env.VITE_API_URL || "https://leancode.onrender.com"
 ).replace(/\/$/, "");
 
 const CONVERSATIONS_KEY = "techpath_ai_conversations";
@@ -497,11 +497,92 @@ export default function AiAssistantPage({ onNavigate }) {
   const textareaRef = useRef(null);
   const abortControllerRef = useRef(null);
   const copiedTimeoutRef = useRef(null);
+  const serverLoadedRef = useRef(false);
+  const saveTimeoutRef = useRef(null);
 
   const activeChat =
     conversations.find((chat) => chat.id === activeChatId) || null;
 
   const messages = activeChat?.messages || [];
+
+  // Load this signed-in user's chat history from MongoDB.
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadServerConversations = async () => {
+      const token = getToken();
+
+      if (!token) {
+        serverLoadedRef.current = true;
+        return;
+      }
+
+      try {
+        const response = await axios.get(`${API_URL}/api/learning-data`, {
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 20000,
+        });
+
+        if (cancelled) return;
+
+        const serverChats = response.data?.data?.aiAssistantChats;
+        const validServerChats = Array.isArray(serverChats)
+          ? serverChats
+              .filter(
+                (chat) =>
+                  chat &&
+                  typeof chat.id === "string" &&
+                  Array.isArray(chat.messages)
+              )
+              .map((chat) => ({
+                ...chat,
+                title: chat.title || "New conversation",
+                messages: chat.messages
+                  .filter(
+                    (message) =>
+                      ["user", "assistant"].includes(message.role) &&
+                      typeof message.content === "string"
+                  )
+                  .slice(-MAX_MESSAGES),
+              }))
+              .sort(
+                (a, b) =>
+                  new Date(b.updatedAt || b.createdAt || 0).getTime() -
+                  new Date(a.updatedAt || a.createdAt || 0).getTime()
+              )
+              .slice(0, MAX_CONVERSATIONS)
+          : [];
+
+        // Prefer cloud data when it exists. If the account has no saved chats
+        // yet, keep the existing browser history so it can be migrated.
+        const localChats = readConversations();
+        const nextChats =
+          validServerChats.length > 0 ? validServerChats : localChats;
+
+        setConversations(nextChats);
+        setActiveChatId((currentId) =>
+          nextChats.some((chat) => chat.id === currentId)
+            ? currentId
+            : nextChats[0]?.id || ""
+        );
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err.response?.data?.message ||
+              "Could not load cloud chat history. Your browser history is still available."
+          );
+        }
+      } finally {
+        if (!cancelled) serverLoadedRef.current = true;
+      }
+    };
+
+    loadServerConversations();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -520,6 +601,44 @@ export default function AiAssistantPage({ onNavigate }) {
     }
   }, [conversations, activeChatId]);
 
+  // Save changes to the authenticated user's MongoDB record (debounced).
+  useEffect(() => {
+    if (!serverLoadedRef.current) return;
+
+    const token = getToken();
+    if (!token) return;
+
+    if (saveTimeoutRef.current) {
+      window.clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = window.setTimeout(async () => {
+      try {
+        await axios.put(
+          `${API_URL}/api/learning-data`,
+          {
+            aiAssistantChats: conversations.slice(0, MAX_CONVERSATIONS),
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            timeout: 20000,
+          }
+        );
+      } catch (err) {
+        setError(
+          err.response?.data?.message ||
+            "Chat history could not sync to your account. Please check your connection."
+        );
+      }
+    }, 700);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        window.clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [conversations]);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({
       behavior: "smooth",
@@ -533,6 +652,10 @@ export default function AiAssistantPage({ onNavigate }) {
 
       if (copiedTimeoutRef.current) {
         window.clearTimeout(copiedTimeoutRef.current);
+      }
+
+      if (saveTimeoutRef.current) {
+        window.clearTimeout(saveTimeoutRef.current);
       }
     };
   }, []);

@@ -6660,6 +6660,9 @@ function App() {
     const [assistantAction, setAssistantAction] = useState("explain");
 const [assistantQuestion, setAssistantQuestion] = useState("");
 const [assistantResult, setAssistantResult] = useState("");
+const [aiMentorHistory, setAiMentorHistory] = useState([]);
+const [mentorHistoryLoadedFor, setMentorHistoryLoadedFor] = useState(null);
+const [mentorHistorySyncStatus, setMentorHistorySyncStatus] = useState("");
 const [isAssistantLoading, setIsAssistantLoading] = useState(false);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -6749,6 +6752,116 @@ const userStorageKey = currentUser?.id || currentUser?._id || "guest";
       setLoadedUserStorageKey(userStorageKey);
     }
   }, [userStorageKey]);
+
+  // Load AI Mentor history from the signed-in user's cloud data.
+  // The local cache is account-scoped and is used as a fallback/migration source.
+  useEffect(() => {
+    let cancelled = false;
+    const token = localStorage.getItem("token");
+    const localHistoryKey = `codementor_ai_mentor_history_${userStorageKey}`;
+
+    const readLocalHistory = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(localHistoryKey) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    };
+
+    setMentorHistoryLoadedFor(null);
+    setMentorHistorySyncStatus("");
+
+    if (!isLoggedIn || !token) {
+      setAiMentorHistory(readLocalHistory());
+      setMentorHistoryLoadedFor(userStorageKey);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    (async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/learning-data`, {
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 20000,
+        });
+
+        if (cancelled) return;
+
+        const payload = response.data?.data || response.data?.learningData || response.data || {};
+        const cloudHistory = Array.isArray(payload.aiMentorChats)
+          ? payload.aiMentorChats
+          : [];
+        const localHistory = readLocalHistory();
+        const historyToUse = cloudHistory.length > 0 ? cloudHistory : localHistory;
+
+        setAiMentorHistory(historyToUse);
+        setMentorHistoryLoadedFor(userStorageKey);
+        setMentorHistorySyncStatus("Synced");
+
+        // Migrate account-scoped browser history only when the server has no history.
+        if (cloudHistory.length === 0 && localHistory.length > 0) {
+          await axios.put(
+            `${API_URL}/api/learning-data`,
+            { aiMentorChats: localHistory },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+              timeout: 20000,
+            }
+          );
+        }
+      } catch (error) {
+        if (cancelled) return;
+        console.error("Could not load AI Mentor history from cloud:", error);
+        // Keep local history available, but do not enable cloud writes after a failed read.
+        setAiMentorHistory(readLocalHistory());
+        setMentorHistorySyncStatus("Offline — saved on this device");
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoggedIn, userStorageKey]);
+
+  // Cache AI Mentor history locally and debounce cloud saves after the initial cloud load.
+  useEffect(() => {
+    const localHistoryKey = `codementor_ai_mentor_history_${userStorageKey}`;
+    try {
+      localStorage.setItem(localHistoryKey, JSON.stringify(aiMentorHistory));
+    } catch (error) {
+      console.error("Could not cache AI Mentor history locally:", error);
+    }
+
+    if (
+      !isLoggedIn ||
+      !localStorage.getItem("token") ||
+      mentorHistoryLoadedFor !== userStorageKey
+    ) {
+      return undefined;
+    }
+
+    const token = localStorage.getItem("token");
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        await axios.put(
+          `${API_URL}/api/learning-data`,
+          { aiMentorChats: aiMentorHistory },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            timeout: 20000,
+          }
+        );
+        setMentorHistorySyncStatus("Synced");
+      } catch (error) {
+        console.error("Could not save AI Mentor history to cloud:", error);
+        setMentorHistorySyncStatus("Sync failed — will keep a local copy");
+      }
+    }, 700);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [aiMentorHistory, isLoggedIn, mentorHistoryLoadedFor, userStorageKey]);
 
   // Keep coins and the current daily-solving streak in sync with saved challenges.
   useEffect(() => {
@@ -7541,11 +7654,22 @@ async function runAICodeAssistant() {
       );
     }
 
-    setAssistantResult(
+    const feedbackText =
       data.feedback ||
-        data.answer ||
-        "The AI returned an empty response. Please try again."
-    );
+      data.answer ||
+      "The AI returned an empty response. Please try again.";
+
+    setAssistantResult(feedbackText);
+    const historyEntry = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      createdAt: new Date().toISOString(),
+      action: assistantAction,
+      question: assistantQuestion.trim(),
+      language,
+      code,
+      response: feedbackText,
+    };
+    setAiMentorHistory((previous) => [historyEntry, ...previous].slice(0, 100));
   } catch (error) {
     console.error("AI Code Assistant Error:", error);
 
@@ -9402,6 +9526,62 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
           </div>
         )}
       </div>
+
+        {aiMentorHistory.length > 0 && (
+          <div className="mt-6 border-t border-slate-200 pt-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="text-lg font-bold">AI Mentor History</h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Your recent AI feedback is saved to your account when cloud sync is available.
+                </p>
+              </div>
+              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                mentorHistorySyncStatus === "Synced"
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "bg-amber-50 text-amber-700"
+              }`}>
+                {mentorHistorySyncStatus || "Loading sync status"}
+              </span>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {aiMentorHistory.slice(0, 10).map((item) => (
+                <article
+                  key={item.id || item.createdAt}
+                  className="rounded-xl border border-slate-200 bg-white p-4"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="font-semibold text-slate-800">
+                        {(item.action || "explain").replace("-", " ")} · {(item.language || "java").toUpperCase()}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {item.createdAt ? new Date(item.createdAt).toLocaleString() : "Saved AI feedback"}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAssistantResult(item.response || "");
+                        setAssistantAction(item.action || "explain");
+                        setAssistantQuestion(item.question || "");
+                      }}
+                      className="rounded-lg border border-indigo-200 px-3 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-50"
+                    >
+                      View response
+                    </button>
+                  </div>
+                  {item.question && (
+                    <p className="mt-2 line-clamp-2 text-sm text-slate-600">
+                      Question: {item.question}
+                    </p>
+                  )}
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
                 
               </div>
             </section>
