@@ -1,5 +1,6 @@
 import React from "react";
 import "./LandingPage.css";
+import titLogo from "./assets/tit-logo.png";
 
 export default function LandingPage({ onLogin, onSignup }) {
   return (
@@ -392,10 +393,10 @@ export default function LandingPage({ onLogin, onSignup }) {
           </p>
           <div className="college-card">
             <div className="college-emblem">
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Technocrats_Logo.png"
-                alt="Technocrats Institute logo"
-              />
+             <img
+  src={titLogo}
+  alt="Technocrats Institute logo"
+/>
             </div>
             <div className="college-copy">
               <span>

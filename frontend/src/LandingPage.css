@@ -452,3 +452,24 @@
     font-size: 20px !important;
   }
 }
+
+/* Adjust college logo white box */
+.landing-page .college-emblem {
+  width: 76px !important;
+  min-width: 76px !important;
+  height: 86px !important;
+  padding: 5px !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden !important;
+  background: #ffffff;
+  border-radius: 12px;
+}
+
+.landing-page .college-emblem img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center;
+}
