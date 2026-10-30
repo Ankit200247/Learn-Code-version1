@@ -1,21 +1,15 @@
 import React from "react";
 import "./LandingPage.css";
-import titLogo from "./assets/tit-logo.png";
 
 export default function LandingPage({ onLogin, onSignup }) {
   return (
     <div className="landing-page">
     <nav>
       <a className="brand" href="#" aria-label="Learn Code home">
-        <span className="brand-mark" aria-label="Learn Code logo">
-          {"</>"}
+        <span className="brand-mark" aria-hidden="true">
+          &lt;/&gt;
         </span>
-        <span className="brand-name">
-          learn
-          <span>
-            code
-          </span>
-        </span>
+        <span className="brand-name">Learn Code</span>
       </a>
       <div className="navlinks">
         <a href="#solution">
@@ -398,7 +392,10 @@ export default function LandingPage({ onLogin, onSignup }) {
           </p>
           <div className="college-card">
             <div className="college-emblem">
-                <img src={titLogo} alt="Technocrats Institute of Technology Logo" />
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Technocrats_Logo.png"
+                alt="Technocrats Institute logo"
+              />
             </div>
             <div className="college-copy">
               <span>
