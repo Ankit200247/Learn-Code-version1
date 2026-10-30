@@ -1,0 +1,448 @@
+
+.landing-page {--ink:#17192b;--muted:#687087;--purple:#5755f5;--violet:#7774ff;--bg:#f7f8fc;--line:#e8eaf3;--white:#fff;--green:#27b887}
+
+.landing-page * {box-sizing:border-box}
+.landing-page {scroll-behavior:smooth}
+.landing-page {margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+.landing-page a {text-decoration:none;color:inherit}
+
+.landing-page nav {height:82px;max-width:1220px;margin:auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between}
+.landing-page .brand {font-size:25px;font-weight:850;letter-spacing:-1.3px}
+.landing-page .brand span {color:var(--purple)}
+.landing-page .navlinks {display:flex;gap:29px;color:#656d83;font-size:13px;font-weight:650}
+.landing-page .navlinks a:hover {color:var(--purple)}
+.landing-page .navright {display:flex;gap:20px;align-items:center;font-size:13px;font-weight:750}
+.landing-page .btn {display:inline-flex;align-items:center;justify-content:center;padding:13px 19px;border-radius:11px;background:var(--purple);color:white;font-weight:750;box-shadow:0 9px 24px #5755f532;transition:.2s}
+.landing-page .btn:hover {transform:translateY(-2px);box-shadow:0 13px 28px #5755f54a}
+.landing-page .login {color:#3f455b}
+
+.landing-page .hero {max-width:1220px;margin:auto;padding:64px 28px 85px;display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center;min-height:620px}
+.landing-page .pill {display:inline-flex;align-items:center;gap:8px;border:1px solid #e5e6f3;border-radius:99px;padding:8px 12px;background:#fff;color:#555d76;font-size:11px;font-weight:800;letter-spacing:.7px}
+.landing-page .pulse {height:7px;width:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px #e4f8f1}
+
+.landing-page h1 {font-size:clamp(53px,6vw,77px);line-height:1.01;letter-spacing:-5px;margin:24px 0 20px;font-weight:880}
+.landing-page h1 .purple {color:var(--purple)}
+.landing-page .lead {max-width:550px;font-size:17px;line-height:1.8;color:var(--muted);margin:0 0 26px}
+.landing-page .actions {display:flex;align-items:center;gap:23px;flex-wrap:wrap}
+.landing-page .textlink {font-size:13px;font-weight:750;color:#41475d}
+.landing-page .textlink b {color:var(--purple);font-size:18px;margin-left:5px}
+.landing-page .hero-note {display:flex;align-items:center;gap:10px;margin-top:32px;color:#858ba0;font-size:12px;font-weight:650}
+.landing-page .check {width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#e7f8f1;color:#169a6c;font-weight:900}
+
+.landing-page .dashboard-wrap {position:relative;padding:20px 8px}
+.landing-page .halo {position:absolute;inset:4% 5%;background:radial-gradient(circle,#e7e6ff 0%,#eeedff 52%,transparent 73%);filter:blur(5px)}
+.landing-page .dashboard {position:relative;background:#fff;border:1px solid #e8e9f2;border-radius:20px;box-shadow:0 25px 70px #28294b18;overflow:hidden;transform:rotate(.6deg)}
+.landing-page .dash-top {height:52px;padding:0 19px;border-bottom:1px solid #eff0f6;display:flex;align-items:center;justify-content:space-between}
+.landing-page .dash-brand {font-size:12px;font-weight:850}
+.landing-page .dash-brand span {color:var(--purple)}
+.landing-page .dash-user {font-size:10px;color:#858ba0;background:#f4f5fa;border-radius:30px;padding:7px 10px}
+.landing-page .dash-body {display:grid;grid-template-columns:112px 1fr;min-height:365px}
+.landing-page .sidebar {background:#fafaff;border-right:1px solid #eff0f6;padding:20px 11px}
+.landing-page .sideitem {font-size:9px;color:#7c8298;padding:10px 9px;border-radius:7px;margin-bottom:5px}
+.landing-page .sideitem.active {background:#eeedff;color:var(--purple);font-weight:800}
+.landing-page .mainpanel {padding:22px 20px}
+.landing-page .welcome {font-size:17px;font-weight:850;letter-spacing:-.4px}
+.landing-page .subwelcome {font-size:10px;color:#9298aa;margin-top:5px}
+.landing-page .progressbox {margin-top:16px;padding:13px;border:1px solid #eeeef6;border-radius:11px}
+.landing-page .progresshead {display:flex;justify-content:space-between;font-size:10px;font-weight:750}
+.landing-page .progresshead span {color:var(--purple)}
+.landing-page .bar {height:6px;background:#eeeef7;border-radius:8px;margin-top:10px;overflow:hidden}
+.landing-page .bar i {display:block;width:68%;height:100%;background:linear-gradient(90deg,#5755f5,#9996ff);border-radius:8px}
+.landing-page .module-title {font-size:11px;font-weight:850;margin:18px 0 9px}
+.landing-page .modules {display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.landing-page .module {border:1px solid #eeeef5;border-radius:10px;padding:11px;min-height:77px}
+.landing-page .module-icon {height:23px;width:23px;display:grid;place-items:center;border-radius:7px;background:#efefff;color:var(--purple);font-size:11px;font-weight:900}
+.landing-page .module strong {display:block;font-size:10px;margin-top:7px}
+.landing-page .module small {font-size:8px;color:#8b91a4}
+.landing-page .ai-tip {margin-top:12px;padding:11px;border-radius:10px;background:#f3f2ff;display:flex;gap:9px;align-items:center}
+.landing-page .spark {height:25px;width:25px;flex:none;border-radius:8px;background:#e4e2ff;color:var(--purple);display:grid;place-items:center}
+.landing-page .ai-tip strong {display:block;font-size:9px}
+.landing-page .ai-tip small {font-size:8px;color:#777e96}
+
+.landing-page .float {position:absolute;background:white;border:1px solid #ececf5;border-radius:12px;padding:12px 14px;box-shadow:0 12px 30px #24264b16;font-size:10px;font-weight:800}
+.landing-page .float small {display:block;color:#8b91a4;font-size:9px;font-weight:600;margin-top:4px}
+.landing-page .f1 {right:-8px;top:2px}
+.landing-page .f2 {left:-13px;bottom:18px}
+
+.landing-page .problem {background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:70px 28px}
+.landing-page .section {max-width:1120px;margin:auto}
+.landing-page .center {text-align:center}
+.landing-page .eyebrow {font-size:10px;font-weight:850;letter-spacing:1.6px;color:var(--purple)}
+.landing-page h2 {font-size:36px;line-height:1.15;letter-spacing:-1.6px;margin:12px 0;color:var(--ink)}
+.landing-page .section-intro {max-width:650px;margin:0 auto;color:var(--muted);font-size:15px;line-height:1.75}
+.landing-page .problem-grid {display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px}
+.landing-page .problem-card {padding:23px;border:1px solid var(--line);border-radius:15px;background:#fff}
+.landing-page .problem-card .num {font-size:11px;color:var(--purple);font-weight:900}
+.landing-page .problem-card h3 {font-size:15px;margin:13px 0 8px}
+.landing-page .problem-card p {font-size:12px;line-height:1.7;color:var(--muted);margin:0}
+
+.landing-page .solution {max-width:1120px;margin:auto;padding:82px 28px}
+.landing-page .solution-head {text-align:center}
+.landing-page .solution-grid {display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px}
+.landing-page .solution-card {background:#fff;border:1px solid var(--line);border-radius:16px;padding:23px;transition:.2s}
+.landing-page .solution-card:hover {transform:translateY(-4px);box-shadow:0 16px 32px #24264b0d}
+.landing-page .ico {height:42px;width:42px;display:grid;place-items:center;border-radius:12px;background:#efefff;color:var(--purple);font-size:19px;font-weight:850}
+.landing-page .solution-card h3 {font-size:15px;margin:17px 0 8px}
+.landing-page .solution-card p {font-size:12px;line-height:1.7;color:var(--muted);margin:0}
+
+.landing-page .path {background:#191b30;color:#fff;padding:76px 28px}
+.landing-page .path-inner {max-width:1120px;margin:auto;display:grid;grid-template-columns:.8fr 1.2fr;gap:50px;align-items:center}
+.landing-page .path h2 {color:white}
+.landing-page .path p {color:#b5bad0;font-size:14px;line-height:1.8}
+.landing-page .steps {display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.landing-page .step {border:1px solid #383a53;border-radius:13px;padding:15px 12px;background:#22243b}
+.landing-page .step b {display:block;color:#aaa7ff;font-size:11px}
+.landing-page .step strong {display:block;font-size:12px;margin-top:12px}
+.landing-page .step small {display:block;color:#aeb3c8;font-size:9px;line-height:1.5;margin-top:6px}
+
+.landing-page .cta {max-width:1120px;margin:75px auto;padding:0 28px}
+.landing-page .cta-box {background:linear-gradient(120deg,#5554f5,#7774ff);border-radius:20px;padding:42px 45px;color:white;display:flex;justify-content:space-between;align-items:center;gap:25px}
+.landing-page .cta h2 {color:white;margin:0 0 9px}
+.landing-page .cta p {color:#e4e3ff;margin:0;font-size:13px}
+.landing-page .cta .btn {background:white;color:var(--purple);box-shadow:none;white-space:nowrap}
+
+.landing-page footer {border-top:1px solid var(--line);padding:25px 28px;text-align:center;color:#8990a4;font-size:11px}
+
+@media (max-width:850px){
+.landing-page .navlinks {display:none}
+.landing-page .hero {grid-template-columns:1fr;padding-top:45px;gap:30px}
+.landing-page .dashboard-wrap {max-width:580px;width:100%;margin:auto}
+.landing-page .path-inner {grid-template-columns:1fr}
+.landing-page .steps {grid-template-columns:repeat(4,1fr)}
+}
+
+@media (max-width:600px){
+.landing-page nav {height:70px;padding:0 18px}
+.landing-page .navright {gap:12px}
+.landing-page .navright .btn {padding:10px 12px}
+.landing-page .hero {padding:40px 20px 60px}
+.landing-page h1 {font-size:53px;letter-spacing:-3.7px}
+.landing-page .lead {font-size:15px}
+.landing-page .dashboard-wrap {padding:16px 0}
+.landing-page .dash-body {grid-template-columns:82px 1fr}
+.landing-page .sidebar {padding:14px 7px}
+.landing-page .sideitem {font-size:8px;padding:9px 6px}
+.landing-page .mainpanel {padding:16px 12px}
+.landing-page .modules {gap:6px}
+.landing-page .module {padding:8px}
+.landing-page .f1 {right:-3px}
+.landing-page .f2 {left:-4px}
+.landing-page .problem, .landing-page .solution {padding:58px 20px}
+.landing-page .problem-grid, .landing-page .solution-grid {grid-template-columns:1fr}
+.landing-page .problem h2, .landing-page h2 {font-size:29px}
+.landing-page .path {padding:58px 20px}
+.landing-page .steps {grid-template-columns:1fr 1fr}
+.landing-page .cta {margin:55px auto;padding:0 20px}
+.landing-page .cta-box {padding:30px 24px;display:block}
+.landing-page .cta .btn {margin-top:20px}
+.landing-page footer {padding:22px}
+}
+
+
+/* Extra visual polish */
+
+.landing-page ::selection {background:#dedcff;color:#2925a8}
+
+.landing-page nav {position:relative;z-index:5}
+
+.landing-page .brand:before {content:"✦";display:inline-grid;place-items:center;width:29px;height:29px;margin-right:8px;border-radius:9px;background:linear-gradient(135deg,#5755f5,#9693ff);color:#fff;font-size:15px;box-shadow:0 6px 14px #5755f544}
+
+.landing-page h1 .purple {background:linear-gradient(100deg,#514ff0 5%,#8b65ed 55%,#a16bea 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.landing-page .pill {box-shadow:0 5px 18px #28294b08}
+
+.landing-page .dashboard {animation:floaty 6s ease-in-out infinite;box-shadow:0 30px 80px #3836a326,0 5px 18px #24264b0b}
+
+@keyframes  floaty {0%,100%{transform:translateY(0) rotate(.6deg)}50%{transform:translateY(-10px) rotate(.2deg)}}
+
+.landing-page .halo {background:radial-gradient(circle,#dedcff 0%,#edecff 48%,transparent 73%);animation:breathe 7s ease-in-out infinite}
+
+@keyframes  breathe {0%,100%{transform:scale(.96);opacity:.8}50%{transform:scale(1.06);opacity:1}}
+
+.landing-page .float {animation:floatTag 5s ease-in-out infinite}
+.landing-page .f2 {animation-delay:1.1s}
+
+@keyframes  floatTag {0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+
+.landing-page .problem-card, .landing-page .solution-card {position:relative;overflow:hidden;transition:transform .22s,box-shadow .22s}
+
+.landing-page .problem-card:after, .landing-page .solution-card:after {content:"";position:absolute;left:0;top:0;width:100%;height:3px;background:linear-gradient(90deg,#5755f5,#aaa7ff);transform:scaleX(0);transform-origin:left;transition:transform .28s}
+
+.landing-page .problem-card:hover:after, .landing-page .solution-card:hover:after {transform:scaleX(1)}
+
+.landing-page .problem-card:hover {transform:translateY(-5px);box-shadow:0 17px 35px #28294b0d}
+
+.landing-page .solution-card {box-shadow:0 5px 18px #24264b05}
+
+.landing-page .ico {box-shadow:inset 0 0 0 1px #e4e2ff}
+
+.landing-page .path {position:relative;overflow:hidden;background:radial-gradient(circle at 85% 15%,#34365b 0,transparent 32%),#191b30}
+
+.landing-page .path:after {content:"✦";position:absolute;right:5%;bottom:-150px;font-size:360px;color:#ffffff08;pointer-events:none}
+
+.landing-page .path-inner {position:relative;z-index:1}
+
+.landing-page .step {transition:transform .2s,border-color .2s,background .2s}
+.landing-page .step:hover {transform:translateY(-5px);border-color:#7774ff;background:#292b49}
+
+.landing-page .cta-box {position:relative;overflow:hidden;box-shadow:0 22px 50px #5755f538}
+
+.landing-page .cta-box:after {content:"✦";position:absolute;right:26%;top:-60px;font-size:220px;color:#ffffff14;pointer-events:none}
+
+.landing-page .cta-box>* {position:relative;z-index:1}
+
+@media (prefers-reduced-motion:reduce){
+.landing-page *, .landing-page *:before, .landing-page *:after {animation:none!important;scroll-behavior:auto!important;transition:none!important}
+}
+
+
+
+/* Learning journey visual — replaces the dashboard mockup */
+
+.landing-page .journey-visual {position:relative;min-height:500px;display:flex;flex-direction:column;justify-content:center;gap:13px;padding:46px 30px 45px 52px}
+
+.landing-page .journey-glow {position:absolute;inset:5% 0;background:radial-gradient(ellipse at center,#e6e4ff 0%,#f0efff 47%,transparent 73%);filter:blur(8px)}
+
+.landing-page .journey-heading {position:relative;z-index:1;display:flex;align-items:center;gap:12px;margin:0 0 8px 8px}
+
+.landing-page .journey-star {width:39px;height:39px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(135deg,#5755f5,#9693ff);color:white;font-size:20px;box-shadow:0 8px 20px #5755f540}
+
+.landing-page .journey-heading strong {display:block;font-size:17px;letter-spacing:-.4px}
+.landing-page .journey-heading small {display:block;color:#858ba0;font-size:11px;margin-top:4px}
+
+.landing-page .journey-line {position:absolute;z-index:0;left:80px;top:130px;bottom:115px;border-left:2px dashed #c9c7ff}
+
+.landing-page .journey-card {position:relative;z-index:1;display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #e9e9f5;border-radius:16px;padding:15px 16px;box-shadow:0 13px 35px #27284b0d;transition:transform .22s,box-shadow .22s}
+
+.landing-page .journey-card:hover {transform:translateX(6px);box-shadow:0 17px 35px #5755f51a}
+
+.landing-page .jc-one {margin-left:15px;margin-right:20px}
+.landing-page .jc-two {margin-left:42px;margin-right:0}
+.landing-page .jc-three {margin-left:15px;margin-right:20px}
+.landing-page .jc-four {margin-left:42px;margin-right:0}
+
+.landing-page .journey-icon {width:43px;height:43px;flex:none;display:grid;place-items:center;border-radius:13px;font-size:18px;font-weight:850}
+
+.landing-page .purple-icon {background:#efedff;color:#5b58f4}
+.landing-page .blue-icon {background:#eaf3ff;color:#4288e8}
+.landing-page .pink-icon {background:#fff0f6;color:#dc68a0}
+.landing-page .green-icon {background:#e8f9f2;color:#1ca77b}
+
+.landing-page .journey-copy {min-width:0;flex:1}
+.landing-page .journey-step {display:block;color:#888ea3;font-size:9px;font-weight:850;letter-spacing:1px;margin-bottom:4px}
+.landing-page .journey-copy strong {display:block;font-size:13px}
+.landing-page .journey-copy small {display:block;color:#858ba0;font-size:10px;margin-top:4px}
+
+.landing-page .journey-check {width:25px;height:25px;display:grid;place-items:center;border-radius:50%;background:#effaf5;color:#20a777;font-size:12px;font-weight:900}
+
+.landing-page .jc-four .journey-check {background:#f0efff;color:#5b58f4}
+
+.landing-page .journey-note {position:relative;z-index:1;margin:5px 0 0 18px;color:#777e95;font-size:11px;font-weight:650}
+.landing-page .journey-note span {color:#7774ff;font-size:17px;vertical-align:-2px;margin-right:5px}
+
+.landing-page .mini-float {position:absolute;z-index:2;background:#fff;border:1px solid #ececf5;border-radius:12px;padding:11px 13px;box-shadow:0 12px 30px #24264b14;font-size:10px;color:#5b58f4}
+
+.landing-page .mini-float b {color:#34394d;margin-left:4px}
+.landing-page .mini-float small {display:block;color:#8b91a4;margin:4px 0 0 22px;font-size:9px}
+
+.landing-page .float-left {left:-4px;bottom:36px}
+.landing-page .float-right {right:-3px;top:35px}
+
+@media (max-width:850px){
+.landing-page .journey-visual {max-width:590px;width:100%;margin:auto;min-height:460px}
+}
+
+@media (max-width:600px){
+.landing-page .journey-visual {padding:45px 8px 45px 20px;min-height:430px;gap:10px}
+.landing-page .journey-line {left:48px;top:120px;bottom:105px}
+.landing-page .jc-one {margin-left:5px;margin-right:14px}
+.landing-page .jc-two {margin-left:23px;margin-right:0}
+.landing-page .jc-three {margin-left:5px;margin-right:14px}
+.landing-page .jc-four {margin-left:23px;margin-right:0}
+.landing-page .journey-copy strong {font-size:12px}
+.landing-page .journey-copy small {font-size:9px}
+.landing-page .journey-card {padding:12px}
+.landing-page .journey-icon {width:38px;height:38px}
+.landing-page .float-left {left:-2px;bottom:18px}
+.landing-page .float-right {right:-1px;top:20px}
+.landing-page .mini-float {padding:9px 10px}
+}
+
+
+
+/* Learn Code project logo */
+
+.landing-page .brand {display:inline-flex;align-items:center;gap:9px}
+
+.landing-page .brand:before {content:none}
+
+.landing-page .brand-mark {width:34px;height:34px;display:flex;align-items:center;justify-content:center;gap:0;border-radius:10px;background:linear-gradient(135deg,#514ff0,#8d82ff);color:#fff;box-shadow:0 7px 16px #5755f544;font-family:ui-monospace,monospace;font-size:13px;font-weight:900;letter-spacing:-2px}
+
+.landing-page .brand-mark i {font-style:normal}
+.landing-page .brand-mark b {font-weight:900;color:#dcdcff}
+
+.landing-page .brand-name {font-size:24px;font-weight:850;letter-spacing:-1.3px;color:var(--ink)}
+
+.landing-page .brand-name span {color:var(--purple)}
+
+.landing-page .about-college {background:#fff;border-top:1px solid var(--line);padding:72px 28px 76px;scroll-margin-top:25px}
+
+.landing-page .about-inner {max-width:900px;margin:auto;text-align:center}
+
+.landing-page .about-label {display:inline-block;padding:7px 12px;border-radius:30px;background:#efeeff;color:var(--purple);font-size:10px;font-weight:850;letter-spacing:1.4px}
+
+.landing-page .about-inner h2 {margin:16px auto 12px;max-width:650px}
+
+.landing-page .about-inner>p {max-width:680px;margin:0 auto;color:var(--muted);font-size:14px;line-height:1.8}
+
+.landing-page .college-card {display:flex;align-items:center;gap:17px;max-width:570px;margin:30px auto 0;padding:20px 23px;text-align:left;border:1px solid #e8e7f7;border-radius:17px;background:linear-gradient(120deg,#fafaff,#fff);box-shadow:0 12px 35px #29294b0b}
+
+.landing-page .college-emblem {width:52px;height:52px;flex:none;display:grid;place-items:center;border-radius:15px;background:linear-gradient(135deg,#5755f5,#8c87ff);color:white;font-size:25px;font-weight:900;box-shadow:0 8px 18px #5755f533}
+
+.landing-page .college-copy span {font-size:9px;letter-spacing:1.5px;color:var(--purple);font-weight:900}
+
+.landing-page .college-copy h3 {font-size:15px;margin:5px 0 4px;letter-spacing:-.2px}
+
+.landing-page .college-copy p {font-size:11px;color:#858ba0;margin:0}
+
+.landing-page footer {background:#f7f8fc}
+
+@media (max-width:600px){
+.landing-page .brand-name {font-size:22px}
+.landing-page .about-college {padding:56px 20px}
+.landing-page .college-card {padding:16px}
+.landing-page .college-copy h3 {font-size:13px}
+}
+
+
+
+.landing-page button { font: inherit; cursor: pointer; border: 0; }
+.landing-page a { text-decoration: none; color: inherit; }
+.landing-page { width: 100%; min-height: 100vh; overflow: hidden; }
+
+
+/* Use the Learn Code code-bracket logo beside the journey heading. */
+.landing-page .journey-star {font-size:16px;font-weight:900;letter-spacing:-2px}
+
+/* College logo */
+.landing-page .college-emblem {
+  width: 112px;
+  min-width: 112px;
+  height: 64px;
+  padding: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e7e8f3;
+  box-shadow: 0 6px 18px rgba(25, 29, 59, 0.08);
+}
+.landing-page .college-emblem img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+
+/* Keep the header logo identical to the learning-journey logo. */
+.landing-page .brand-mark,
+.landing-page .journey-star {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #5755f5, #9693ff) !important;
+  color: #ffffff !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 20px !important;
+  font-weight: 900;
+  letter-spacing: -2px;
+  line-height: 1;
+  box-shadow: 0 8px 20px rgba(87, 85, 245, 0.25);
+}
+
+.landing-page .brand-mark i,
+.landing-page .brand-mark b {
+  color: #ffffff !important;
+  font-style: normal;
+  font-weight: 900;
+}
+
+
+/* TIT emblem only: show the symbol from the official Technocrats logo, hide its wordmark */
+.landing-page .college-emblem {
+  position: relative;
+  width: 72px !important;
+  min-width: 72px !important;
+  height: 72px !important;
+  padding: 0 !important;
+  display: block !important;
+  overflow: hidden !important;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.landing-page .college-emblem img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: auto !important;
+  max-width: none !important;
+  height: 72px !important;
+  object-fit: contain;
+  object-position: left center;
+}
+
+/* TIT Logo - Bottom Cut Fix */
+.landing-page .college-emblem {
+  width: 90px !important;
+  height: 100px !important;
+  min-width: 90px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+}
+
+.landing-page .college-emblem img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain !important;
+  object-position: center center;
+  display: block;
+}
+
+/* TIT Emblem - Final Crop Fix */
+
+.landing-page .college-emblem {
+  width: 100px !important;
+  height: 110px !important;
+  min-width: 100px !important;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible !important;
+  background: white;
+  padding: 5px;
+}
+
+.landing-page .college-emblem img {
+  position: static !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  transform: none !important;
+  display: block;
+}

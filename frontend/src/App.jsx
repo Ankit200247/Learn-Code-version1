@@ -1,4 +1,5 @@
 import "./App.css";
+import LandingPage from "./LandingPage.jsx";
 import { useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import axios from "axios";
@@ -6660,9 +6661,6 @@ function App() {
     const [assistantAction, setAssistantAction] = useState("explain");
 const [assistantQuestion, setAssistantQuestion] = useState("");
 const [assistantResult, setAssistantResult] = useState("");
-const [aiMentorHistory, setAiMentorHistory] = useState([]);
-const [mentorHistoryLoadedFor, setMentorHistoryLoadedFor] = useState(null);
-const [mentorHistorySyncStatus, setMentorHistorySyncStatus] = useState("");
 const [isAssistantLoading, setIsAssistantLoading] = useState(false);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -6752,116 +6750,6 @@ const userStorageKey = currentUser?.id || currentUser?._id || "guest";
       setLoadedUserStorageKey(userStorageKey);
     }
   }, [userStorageKey]);
-
-  // Load AI Mentor history from the signed-in user's cloud data.
-  // The local cache is account-scoped and is used as a fallback/migration source.
-  useEffect(() => {
-    let cancelled = false;
-    const token = localStorage.getItem("token");
-    const localHistoryKey = `codementor_ai_mentor_history_${userStorageKey}`;
-
-    const readLocalHistory = () => {
-      try {
-        const parsed = JSON.parse(localStorage.getItem(localHistoryKey) || "[]");
-        return Array.isArray(parsed) ? parsed : [];
-      } catch {
-        return [];
-      }
-    };
-
-    setMentorHistoryLoadedFor(null);
-    setMentorHistorySyncStatus("");
-
-    if (!isLoggedIn || !token) {
-      setAiMentorHistory(readLocalHistory());
-      setMentorHistoryLoadedFor(userStorageKey);
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    (async () => {
-      try {
-        const response = await axios.get(`${API_URL}/api/learning-data`, {
-          headers: { Authorization: `Bearer ${token}` },
-          timeout: 20000,
-        });
-
-        if (cancelled) return;
-
-        const payload = response.data?.data || response.data?.learningData || response.data || {};
-        const cloudHistory = Array.isArray(payload.aiMentorChats)
-          ? payload.aiMentorChats
-          : [];
-        const localHistory = readLocalHistory();
-        const historyToUse = cloudHistory.length > 0 ? cloudHistory : localHistory;
-
-        setAiMentorHistory(historyToUse);
-        setMentorHistoryLoadedFor(userStorageKey);
-        setMentorHistorySyncStatus("Synced");
-
-        // Migrate account-scoped browser history only when the server has no history.
-        if (cloudHistory.length === 0 && localHistory.length > 0) {
-          await axios.put(
-            `${API_URL}/api/learning-data`,
-            { aiMentorChats: localHistory },
-            {
-              headers: { Authorization: `Bearer ${token}` },
-              timeout: 20000,
-            }
-          );
-        }
-      } catch (error) {
-        if (cancelled) return;
-        console.error("Could not load AI Mentor history from cloud:", error);
-        // Keep local history available, but do not enable cloud writes after a failed read.
-        setAiMentorHistory(readLocalHistory());
-        setMentorHistorySyncStatus("Offline — saved on this device");
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isLoggedIn, userStorageKey]);
-
-  // Cache AI Mentor history locally and debounce cloud saves after the initial cloud load.
-  useEffect(() => {
-    const localHistoryKey = `codementor_ai_mentor_history_${userStorageKey}`;
-    try {
-      localStorage.setItem(localHistoryKey, JSON.stringify(aiMentorHistory));
-    } catch (error) {
-      console.error("Could not cache AI Mentor history locally:", error);
-    }
-
-    if (
-      !isLoggedIn ||
-      !localStorage.getItem("token") ||
-      mentorHistoryLoadedFor !== userStorageKey
-    ) {
-      return undefined;
-    }
-
-    const token = localStorage.getItem("token");
-    const timeoutId = window.setTimeout(async () => {
-      try {
-        await axios.put(
-          `${API_URL}/api/learning-data`,
-          { aiMentorChats: aiMentorHistory },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            timeout: 20000,
-          }
-        );
-        setMentorHistorySyncStatus("Synced");
-      } catch (error) {
-        console.error("Could not save AI Mentor history to cloud:", error);
-        setMentorHistorySyncStatus("Sync failed — will keep a local copy");
-      }
-    }, 700);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [aiMentorHistory, isLoggedIn, mentorHistoryLoadedFor, userStorageKey]);
 
   // Keep coins and the current daily-solving streak in sync with saved challenges.
   useEffect(() => {
@@ -7654,22 +7542,11 @@ async function runAICodeAssistant() {
       );
     }
 
-    const feedbackText =
+    setAssistantResult(
       data.feedback ||
-      data.answer ||
-      "The AI returned an empty response. Please try again.";
-
-    setAssistantResult(feedbackText);
-    const historyEntry = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      createdAt: new Date().toISOString(),
-      action: assistantAction,
-      question: assistantQuestion.trim(),
-      language,
-      code,
-      response: feedbackText,
-    };
-    setAiMentorHistory((previous) => [historyEntry, ...previous].slice(0, 100));
+        data.answer ||
+        "The AI returned an empty response. Please try again."
+    );
   } catch (error) {
     console.error("AI Code Assistant Error:", error);
 
@@ -7913,163 +7790,11 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
   // Landing page and authentication are shown before the dashboard.
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen overflow-hidden bg-slate-950 text-white">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -left-40 -top-40 h-96 w-96 rounded-full bg-indigo-600/20 blur-3xl" />
-          <div className="absolute -right-32 top-40 h-96 w-96 rounded-full bg-cyan-500/10 blur-3xl" />
-        </div>
-
-        <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-5 py-6 sm:px-8">
-          <button
-            onClick={() => setShowAuth(false)}
-            className="flex items-center gap-3"
-          >
-            <span aria-label="Learn Code logo" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 text-sm font-black tracking-tight text-white shadow-lg shadow-indigo-600/30 ring-1 ring-white/20">
-              &lt;/&gt;
-            </span>
-
-            <span className="text-xl font-bold tracking-tight">
-              Learn Code
-            </span>
-          </button>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => openAuth("login")}
-              className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
-            >
-              Login
-            </button>
-
-            <button
-              onClick={() => openAuth("signup")}
-              className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500"
-            >
-              Get Started
-            </button>
-          </div>
-        </header>
-
-        <main className="relative z-10 mx-auto grid max-w-7xl items-center gap-14 px-5 pb-20 pt-12 sm:px-8 md:grid-cols-2 md:pb-28 md:pt-20">
-          <section>
-            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-400/10 px-4 py-2 text-sm font-medium text-indigo-200">
-              <span>✦</span>
-              Your personal AI coding companion
-            </div>
-
-            <h1 className="max-w-2xl text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-              Learn to code.
-              <span className="block bg-gradient-to-r from-indigo-400 to-cyan-300 bg-clip-text text-transparent">
-                Build your future.
-              </span>
-            </h1>
-
-            <p className="mt-6 max-w-xl text-base leading-8 text-slate-300 sm:text-lg">
-              Practice programming, solve coding challenges,
-              follow a learning roadmap and improve your code
-              with AI-powered feedback.
-            </p>
-
-            <div className="mt-9 flex flex-wrap gap-3">
-              <button
-                onClick={() => openAuth("signup")}
-                className="rounded-xl bg-indigo-600 px-6 py-3.5 font-semibold text-white shadow-lg shadow-indigo-600/25 transition hover:-translate-y-0.5 hover:bg-indigo-500"
-              >
-                Start Learning Free →
-              </button>
-
-              <button
-                onClick={() => openAuth("login")}
-                className="rounded-xl border border-white/15 bg-white/5 px-6 py-3.5 font-semibold text-white transition hover:bg-white/10"
-              >
-                I have an account
-              </button>
-            </div>
-
-            <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm text-slate-400">
-              <span>✓ Hands-on coding</span>
-              <span>✓ AI feedback</span>
-              <span>✓ Personalized learning</span>
-            </div>
-          </section>
-
-          <section className="relative mx-auto w-full max-w-xl">
-            <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-4 shadow-2xl shadow-black/30 backdrop-blur-xl sm:p-6">
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <div>
-                  <p className="text-sm font-semibold">
-                    Your Coding Workspace
-                  </p>
-                  <p className="mt-1 text-xs text-slate-400">
-                    Practice · Learn · Improve
-                  </p>
-                </div>
-
-                <span className="rounded-lg bg-emerald-400/10 px-3 py-1.5 text-xs font-semibold text-emerald-300">
-                  Ready to learn
-                </span>
-              </div>
-
-              <div className="mt-5 rounded-2xl border border-white/10 bg-slate-950 p-5 font-mono text-sm leading-7">
-                <p className="text-slate-500">
-                  // Your first Java program
-                </p>
-                <p>
-                  <span className="text-fuchsia-300">class</span>{" "}
-                  <span className="text-cyan-300">Main</span>{" "}
-                  {"{"}
-                </p>
-                <p className="pl-5">
-                  <span className="text-fuchsia-300">public static void</span>{" "}
-                  <span className="text-amber-200">main</span>() {"{"}
-                </p>
-                <p className="pl-10">
-                  System.out.println(
-                  <span className="text-emerald-300">
-                    "Hello, Developer!"
-                  </span>
-                  );
-                </p>
-                <p className="pl-5">{"}"}</p>
-                <p>{"}"}</p>
-              </div>
-
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-indigo-400/10 p-4">
-                  <p className="text-xs text-indigo-200">
-                    Practice
-                  </p>
-                  <p className="mt-2 text-lg font-bold">
-                    Coding Challenges
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-cyan-400/10 p-4">
-                  <p className="text-xs text-cyan-200">
-                    Improve
-                  </p>
-                  <p className="mt-2 text-lg font-bold">
-                    AI Feedback
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="absolute -bottom-5 -left-3 hidden rounded-2xl border border-white/10 bg-slate-900 px-5 py-3 shadow-xl sm:block">
-              <p className="text-sm font-semibold">
-                Keep learning 🚀
-              </p>
-              <p className="mt-1 text-xs text-slate-400">
-                One problem at a time
-              </p>
-            </div>
-          </section>
-        </main>
-
-        <footer className="relative z-10 border-t border-white/10 px-5 py-6 text-center text-sm text-slate-500">
-          Learn Code · Learn by building.
-        </footer>
-
+      <div className="min-h-screen">
+        <LandingPage
+          onLogin={() => openAuth("login")}
+          onSignup={() => openAuth("signup")}
+        />
         {showAuth && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm"
@@ -8083,11 +7808,9 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
               <div className="mb-6 flex items-start justify-between">
                 <div>
                   <div className="mb-4 flex h-12 w-12 items-center justify-center">
-  <img
-    src="/favicon.svg"
-    alt="Learn Code logo"
-    className="h-12 w-12 object-contain"
-  />
+ <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-xl font-extrabold text-white shadow-lg">
+  {"</>"}
+</div>
 </div>
 
                   <h2 className="text-2xl font-bold">
@@ -9526,62 +9249,6 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
           </div>
         )}
       </div>
-
-        {aiMentorHistory.length > 0 && (
-          <div className="mt-6 border-t border-slate-200 pt-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h3 className="text-lg font-bold">AI Mentor History</h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  Your recent AI feedback is saved to your account when cloud sync is available.
-                </p>
-              </div>
-              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                mentorHistorySyncStatus === "Synced"
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "bg-amber-50 text-amber-700"
-              }`}>
-                {mentorHistorySyncStatus || "Loading sync status"}
-              </span>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              {aiMentorHistory.slice(0, 10).map((item) => (
-                <article
-                  key={item.id || item.createdAt}
-                  className="rounded-xl border border-slate-200 bg-white p-4"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="font-semibold text-slate-800">
-                        {(item.action || "explain").replace("-", " ")} · {(item.language || "java").toUpperCase()}
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        {item.createdAt ? new Date(item.createdAt).toLocaleString() : "Saved AI feedback"}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAssistantResult(item.response || "");
-                        setAssistantAction(item.action || "explain");
-                        setAssistantQuestion(item.question || "");
-                      }}
-                      className="rounded-lg border border-indigo-200 px-3 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-50"
-                    >
-                      View response
-                    </button>
-                  </div>
-                  {item.question && (
-                    <p className="mt-2 line-clamp-2 text-sm text-slate-600">
-                      Question: {item.question}
-                    </p>
-                  )}
-                </article>
-              ))}
-            </div>
-          </div>
-        )}
                 
               </div>
             </section>
