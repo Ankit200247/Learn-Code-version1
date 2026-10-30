@@ -26,18 +26,25 @@ const PORT = Number(process.env.PORT) || 5000;
 // --------------------------------------------------
 
     const allowedOrigins = [
-      "http://localhost:5173",
-      "https://learn-code-frontend-ux8j.onrender.com",
-    ];
+  "http://localhost:5173",
+  "https://learn-code-frontend-ux8j.onrender.com"
+];
 
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
-  })
-);
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
 
 // --------------------------------------------------
 // CONFIGURATION
