@@ -44,6 +44,7 @@ Open the local URL printed by Vite, usually `http://localhost:5173`.
 
 - The project code has been preserved as much as possible. The `backend/server.js` Git conflict sections were resolved by keeping the existing `HEAD` implementation and removing the duplicated conflicting branch.
 - The original `server/.env` was intentionally not copied into this archive to avoid bundling private API/database credentials. Copy its values into the new `backend/.env` yourself, especially `MONGODB_URI`, `JWT_SECRET`, and your Gemini key.
+<<<<<<< HEAD
 - The frontend uses `VITE_API_URL` for API requests (default: `https://leancode.onrender.com`). For local testing create `frontend/.env` with `VITE_API_URL=http://localhost:5000`.
 - This archive does not include `node_modules`; `npm install` recreates dependencies for your machine.
 
@@ -58,3 +59,7 @@ Progress (roadmaps, learning state, submissions, Beginner Zone/Daily Challenge, 
 2. Open http://localhost:5000/api/health in the browser. It must show JSON with `"mongoConnected": true`.
 3. Then run the frontend: `cd frontend && npm install && npm run dev` (restart it after any `.env` change).
 4. If `mongoConnected` is false: MongoDB Atlas -> Network Access -> add your current IP (or 0.0.0.0/0 for testing).
+=======
+- The frontend currently uses `http://https://leancode.onrender.com` for API requests, so run the backend locally while testing.
+- This archive does not include `node_modules`; `npm install` recreates dependencies for your machine.
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3

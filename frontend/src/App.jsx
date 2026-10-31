@@ -18,6 +18,7 @@ import {
 } from "recharts";
 import BeginnerZone from "./BeginnerZone";
 import DailyChallenge from "./DailyChallenge";
+<<<<<<< HEAD
 import {
   useCloudField,
   mergeById,
@@ -29,6 +30,12 @@ import {
 
 const API_URL = (
   import.meta.env.VITE_API_URL || (import.meta.env.DEV ? `http://${window.location.hostname}:5000` : "https://leancode.onrender.com")
+=======
+
+
+const API_URL = (
+  import.meta.env.VITE_API_URL || "https://leancode.onrender.com"
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 ).replace(/\/+$/, "");
 
 const CODE_EXPLANATIONS = {
@@ -6656,6 +6663,7 @@ function App() {
   const [submissionStatus, setSubmissionStatus] = useState("");
   const [submissionHistory, setSubmissionHistory] = useState([]);
   const [allSubmissionEntries, setAllSubmissionEntries] = useState([]);
+<<<<<<< HEAD
   // Mirror of this account's saved submissions, kept in state so it can be
   // synced to the server (the real copy still lives in localStorage too).
   const [submissionsSnapshot, setSubmissionsSnapshot] = useState(() => {
@@ -6669,6 +6677,8 @@ function App() {
       return {};
     }
   });
+=======
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
   const [submissionFilter, setSubmissionFilter] = useState("All");
   const [submissionLanguageFilter, setSubmissionLanguageFilter] = useState("All");
   const [submissionSearch, setSubmissionSearch] = useState("");
@@ -6857,6 +6867,7 @@ const userStorageKey = currentUser?.id || currentUser?._id || "guest";
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn]);
 
+<<<<<<< HEAD
   // ------------------------------------------------------------------
   // Cross-device sync: the same account shows the same data everywhere.
   // ------------------------------------------------------------------
@@ -6982,6 +6993,8 @@ const userStorageKey = currentUser?.id || currentUser?._id || "guest";
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn]);
 
+=======
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
   async function handleAuth(event) {
     event.preventDefault();
 
@@ -7200,6 +7213,7 @@ setActivePage("Dashboard");
   // only when at least one submission was accepted; failed attempts remain attempted.
   const savedProblemSubmissions = readAllSubmissions();
   const getProblemStatus = (problem) => {
+<<<<<<< HEAD
     // Solved on any device: the server keeps one record per solved problem.
     if (
       Array.isArray(userProgress) &&
@@ -7209,6 +7223,8 @@ setActivePage("Dashboard");
     ) {
       return "solved";
     }
+=======
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
     const saved = savedProblemSubmissions[getProblemSubmissionId(problem)];
     const attempts = Array.isArray(saved?.history)
       ? saved.history
@@ -7557,7 +7573,10 @@ setActivePage("Dashboard");
         getSubmissionStorageKey(),
         JSON.stringify(allSubmissions)
       );
+<<<<<<< HEAD
       setSubmissionsSnapshot({ ...allSubmissions });
+=======
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
       setSubmissionHistory(history);
       setAllSubmissionEntries(getAllSubmissionEntries());
 

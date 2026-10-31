@@ -15,6 +15,7 @@ import LearningData from "./models/LearningData.js";
 
 dotenv.config();
 
+<<<<<<< HEAD
 // DNS: use the system resolver first. If the MongoDB SRV lookup fails
 // (common on some ISPs/hotspots) connectMongoDB() retries with Google DNS.
 let googleDnsApplied = false;
@@ -24,6 +25,10 @@ function applyGoogleDns() {
   googleDnsApplied = true;
   console.warn("Retrying MongoDB with public DNS servers...");
 }
+=======
+// DNS fix for environments where the default resolver fails.
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
@@ -32,6 +37,7 @@ const PORT = Number(process.env.PORT) || 5000;
 // MIDDLEWARE
 // --------------------------------------------------
 
+<<<<<<< HEAD
 const allowedOrigins = [
   "https://learn-code-frontend-xu8j.onrender.com",
   ...(process.env.CLIENT_URL
@@ -57,6 +63,19 @@ const corsOptions = {
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   optionsSuccessStatus: 204,
+=======
+    const allowedOrigins = [
+  "http://localhost:5173",
+  "https://learn-code-frontend-xu8j.onrender.com"
+];
+
+const corsOptions = {
+  origin: "https://learn-code-frontend-xu8j.onrender.com",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 204
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 };
 
 app.use(cors(corsOptions));
@@ -148,6 +167,7 @@ async function connectMongoDB() {
     } catch (error) {
       mongoConnected = false;
 
+<<<<<<< HEAD
       // DNS (SRV) failure -> retry once using public DNS servers.
       if (
         !googleDnsApplied &&
@@ -169,17 +189,22 @@ async function connectMongoDB() {
         }
       }
 
+=======
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
       console.error(
         "MongoDB connection failed:",
         error.message
       );
 
+<<<<<<< HEAD
       if (/whitelist|IP|not authorized|ReplicaSetNoPrimary|Server selection/i.test(error.message)) {
         console.error(
           "HINT: In MongoDB Atlas -> Network Access, add your current IP (or 0.0.0.0/0 for testing)."
         );
       }
 
+=======
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
       if (error.code) {
         console.error("MongoDB error code:", error.code);
       }
@@ -800,6 +825,7 @@ app.get("/api/auth/me", requireAuth, async (req, res) => {
 // --------------------------------------------------
 // GET USER LEARNING DATA
 // --------------------------------------------------
+<<<<<<< HEAD
 const LEARNING_FIELDS = {
   customRoadmaps: [],
   completedModules: [],
@@ -810,6 +836,8 @@ const LEARNING_FIELDS = {
   aiMentorChats: [],
 };
 
+=======
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 app.get("/api/learning-data", requireAuth, async (req, res) => {
   try {
     if (!databaseReady(res)) return;
@@ -818,6 +846,7 @@ app.get("/api/learning-data", requireAuth, async (req, res) => {
       user: req.userId,
     }).lean();
 
+<<<<<<< HEAD
     const out = {};
     for (const [field, fallback] of Object.entries(LEARNING_FIELDS)) {
       out[field] = data?.[field] ?? fallback;
@@ -829,6 +858,21 @@ app.get("/api/learning-data", requireAuth, async (req, res) => {
       versions: data?.fieldVersions || {},
       data: out,
     });
+=======
+    return res.json({
+  success: true,
+  exists: Boolean(data),
+  data: {
+    customRoadmaps: data?.customRoadmaps ?? [],
+    completedModules: data?.completedModules ?? [],
+    roadmapLearningState: data?.roadmapLearningState ?? {},
+    beginnerZoneData: data?.beginnerZoneData ?? {},
+    submissions: data?.submissions ?? {},
+    aiAssistantChats: data?.aiAssistantChats ?? [],
+    aiMentorChats: data?.aiMentorChats ?? [],
+  },
+});
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
   } catch (error) {
     console.error("Get learning data error:", error.message);
 
@@ -839,6 +883,7 @@ app.get("/api/learning-data", requireAuth, async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 // Cheap endpoint used by devices to check whether anything changed.
 app.get("/api/learning-data/versions", requireAuth, async (req, res) => {
   try {
@@ -870,10 +915,16 @@ app.get("/api/learning-data/versions", requireAuth, async (req, res) => {
 //   is still the newest version. Otherwise the field is returned in
 //   `conflicts` so the client can merge and retry (no silent overwrite).
 // - Old clients that send no baseVersions keep the previous behaviour.
+=======
+// --------------------------------------------------
+// SAVE USER LEARNING DATA
+// --------------------------------------------------
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 app.put("/api/learning-data", requireAuth, async (req, res) => {
   try {
     if (!databaseReady(res)) return;
 
+<<<<<<< HEAD
     const body = req.body || {};
     const baseVersions =
       body.baseVersions && typeof body.baseVersions === "object"
@@ -946,12 +997,48 @@ app.put("/api/learning-data", requireAuth, async (req, res) => {
       versions[field] = updated.fieldVersions?.[field] || 0;
       doc = updated;
     }
+=======
+    const {
+  customRoadmaps,
+  completedModules,
+  roadmapLearningState,
+  beginnerZoneData,
+  submissions,
+  aiAssistantChats,
+  aiMentorChats,
+} = req.body || {};
+
+    const data = await LearningData.findOneAndUpdate(
+      { user: req.userId },
+      {
+        $set: {
+          user: req.userId,
+          ...(customRoadmaps !== undefined && { customRoadmaps }),
+          ...(completedModules !== undefined && { completedModules }),
+          ...(roadmapLearningState !== undefined && { roadmapLearningState }),
+          ...(beginnerZoneData !== undefined && { beginnerZoneData }),
+          ...(submissions !== undefined && { submissions }),
+          ...(aiAssistantChats !== undefined && { aiAssistantChats }),
+          ...(aiMentorChats !== undefined && { aiMentorChats }),
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+        runValidators: true,
+        setDefaultsOnInsert: true,
+      }
+    );
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 
     return res.json({
       success: true,
       message: "Learning data saved successfully.",
+<<<<<<< HEAD
       versions,
       conflicts,
+=======
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
     });
   } catch (error) {
     console.error("Save learning data error:", error.message);
@@ -2023,7 +2110,11 @@ async function startServer() {
   // The API server can still run if MongoDB is offline.
   await connectMongoDB();
 
+<<<<<<< HEAD
   const httpServer = app.listen(PORT, "0.0.0.0", () => {
+=======
+  app.listen(PORT, () => {
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
     console.log(
       `\nLearn Code backend running on http://localhost:${PORT}`
     );
@@ -2052,6 +2143,7 @@ async function startServer() {
       `MongoDB connected: ${mongoConnected}\n`
     );
   });
+<<<<<<< HEAD
 
   httpServer.on("error", (err) => {
     if (err.code === "EADDRINUSE") {
@@ -2063,6 +2155,8 @@ async function startServer() {
     }
     process.exit(1);
   });
+=======
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 }
 
 startServer();

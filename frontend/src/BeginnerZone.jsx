@@ -3,7 +3,11 @@ import Editor from "@monaco-editor/react";
 import axios from "axios";
 import "./BeginnerZone.css";
 const API_URL = (
+<<<<<<< HEAD
   import.meta.env.VITE_API_URL || (import.meta.env.DEV ? `http://${window.location.hostname}:5000` : "https://leancode.onrender.com")
+=======
+  import.meta.env.VITE_API_URL || "https://leancode.onrender.com"
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 ).replace(/\/+$/, "");
 
 const LANGUAGES = [
@@ -845,6 +849,69 @@ function readSaved(storageKey) {
   try { return JSON.parse(localStorage.getItem(storageKey)) || {}; }
   catch { return {}; }
 }
+<<<<<<< HEAD
+=======
+function mergeLearningData(localData = {}, serverData = {}) {
+  const local = localData || {};
+  const server = serverData || {};
+
+  const merged = {
+    ...server,
+    ...local,
+
+    // Preserve completed modules from both devices.
+    completed: {
+      ...(server.completed || {}),
+      ...(local.completed || {}),
+    },
+
+    // Preserve question attempts from both devices.
+    attempts: {
+      ...(server.attempts || {}),
+      ...(local.attempts || {}),
+    },
+
+    // Preserve guided learning progress.
+    guidedCompleted: {
+      ...(server.guidedCompleted || {}),
+      ...(local.guidedCompleted || {}),
+    },
+  };
+
+  // Merge roadmaps without duplicating the same roadmap ID.
+  const roadmapMap = new Map();
+
+  [
+    ...(Array.isArray(server.customRoadmaps)
+      ? server.customRoadmaps
+      : []),
+
+    ...(Array.isArray(local.customRoadmaps)
+      ? local.customRoadmaps
+      : []),
+  ].forEach((roadmap) => {
+    if (roadmap?.id != null) {
+      const previous = roadmapMap.get(String(roadmap.id));
+
+      roadmapMap.set(String(roadmap.id), {
+        ...previous,
+        ...roadmap,
+        completed: [
+          ...new Set([
+            ...(previous?.completed || []),
+            ...(roadmap.completed || []),
+          ]),
+        ],
+      });
+    }
+  });
+
+  merged.customRoadmaps = [...roadmapMap.values()];
+
+  return merged;
+}
+
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 export default function BeginnerZone() {
   const storageKey = getUserStorageKey();
   const [language, setLanguage] = useState("java");
@@ -852,6 +919,10 @@ export default function BeginnerZone() {
   const [showPlacementQuestions, setShowPlacementQuestions] = useState(false);
   const [section, setSection] = useState("Guided Learning");
   const [saved, setSaved] = useState(() => readSaved(storageKey));
+<<<<<<< HEAD
+=======
+  const [syncReady, setSyncReady] = useState(false);
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
   const [topicFilter, setTopicFilter] = useState("All topics");
   const [mcqIndex, setMcqIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -916,6 +987,7 @@ const mcqs = MCQS[activeSubject] || [];
     };
   }), [completed, attempts]);
 
+<<<<<<< HEAD
   // Progress is saved in this browser immediately. The account-wide sync
   // (laptop <-> mobile) is handled once in App.jsx; it updates this data
   // and tells us through the "learncode:beginner-data-updated" event.
@@ -940,6 +1012,159 @@ const mcqs = MCQS[activeSubject] || [];
     return () =>
       window.removeEventListener("learncode:beginner-data-updated", reloadFromStorage);
   }, [storageKey]);
+=======
+  useEffect(() => {
+  let cancelled = false;
+
+  async function loadLearningProgress() {
+    const localData = {
+      ...readSaved(storageKey),
+    };
+
+    const token = localStorage.getItem("token");
+
+    // Without login, continue using local storage.
+    if (!token) {
+      if (!cancelled) {
+        setSaved(localData);
+        setCustomRoadmaps(
+          Array.isArray(localData.customRoadmaps)
+            ? localData.customRoadmaps
+            : []
+        );
+        setSyncReady(true);
+      }
+
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/learning-data`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          timeout: 20000,
+        }
+      );
+
+      if (!response.data?.success) {
+        throw new Error("Unable to load learning progress.");
+      }
+
+      if (cancelled) return;
+
+      const serverData =
+        response.data?.data?.beginnerZoneData || {};
+
+      // Merge existing laptop/mobile data with server data.
+      const mergedData = mergeLearningData(
+        localData,
+        serverData
+      );
+
+      setSaved(mergedData);
+
+      setCustomRoadmaps(
+        Array.isArray(mergedData.customRoadmaps)
+          ? mergedData.customRoadmaps
+          : []
+      );
+
+      // Save merged data locally after successful loading.
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify(mergedData)
+      );
+    } catch (error) {
+      console.error(
+        "Learning progress sync error:",
+        error.response?.data || error.message
+      );
+
+      // Keep local data if the server is temporarily unavailable.
+      if (!cancelled) {
+        setSaved(localData);
+
+        setCustomRoadmaps(
+          Array.isArray(localData.customRoadmaps)
+            ? localData.customRoadmaps
+            : []
+        );
+      }
+    } finally {
+      if (!cancelled) {
+        setSyncReady(true);
+      }
+    }
+  }
+
+  loadLearningProgress();
+
+  return () => {
+    cancelled = true;
+  };
+}, [storageKey]);
+
+useEffect(() => {
+  // Never save before the initial load/merge finishes.
+  if (!syncReady) return;
+
+  const learningData = {
+    ...saved,
+    customRoadmaps,
+  };
+
+  // Save locally first.
+  try {
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify(learningData)
+    );
+  } catch (error) {
+    console.error("Local progress save error:", error);
+  }
+
+  const token = localStorage.getItem("token");
+
+  // Guest users can only save locally.
+  if (!token) return;
+
+  // Debounce requests so every small state change
+  // does not immediately trigger a network request.
+  const timer = setTimeout(async () => {
+    try {
+      await axios.put(
+        `${API_URL}/api/learning-data`,
+        {
+          beginnerZoneData: learningData,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          timeout: 20000,
+        }
+      );
+
+      console.log("Learning progress synced successfully.");
+    } catch (error) {
+      console.error(
+        "Could not sync learning progress:",
+        error.response?.data || error.message
+      );
+    }
+  }, 800);
+
+  return () => clearTimeout(timer);
+}, [
+  saved,
+  customRoadmaps,
+  storageKey,
+  syncReady,
+]);
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 
 
   useEffect(() => {
@@ -1015,7 +1240,11 @@ const mcqs = MCQS[activeSubject] || [];
       setRunning(true);
       setGuidedPracticeFeedback("Submitting your Java code to the compiler…");
       try {
+<<<<<<< HEAD
         const response = await axios.post(`${API_URL}/api/run`, {
+=======
+        const response = await axios.post("https://leancode.onrender.com/api/run", {
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
           code: typed,
           language: "java",
           input: "",
@@ -1087,7 +1316,11 @@ const mcqs = MCQS[activeSubject] || [];
     setRunning(true); setRunOutput("Running your code…");
     try {
       const response = await axios.post(
+<<<<<<< HEAD
   `${API_URL}/api/run`,
+=======
+  "https://leancode.onrender.com/api/run",
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
   { code, language, input: customInput }
 );
       setRunOutput(response.data.output || response.data.error || (response.data.success ? "Program finished successfully." : "Execution failed."));
@@ -1101,13 +1334,21 @@ const mcqs = MCQS[activeSubject] || [];
   function createRoadmap(e) {
     e.preventDefault();
     if (!roadmapName.trim()) return;
+<<<<<<< HEAD
     const newRoadmap = { id: Date.now(), name: roadmapName.trim(), language: roadmapLanguage, topics: [roadmapTopic], completed: [], updatedAt: new Date().toISOString() };
+=======
+    const newRoadmap = { id: Date.now(), name: roadmapName.trim(), language: roadmapLanguage, topics: [roadmapTopic], completed: [] };
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
     setCustomRoadmaps((prev) => [...prev, newRoadmap]);
     setRoadmapName("");
   }
 
   function toggleRoadmapTopic(id, topic) {
+<<<<<<< HEAD
     setCustomRoadmaps((prev) => prev.map((r) => r.id !== id ? r : ({ ...r, updatedAt: new Date().toISOString(), completed: r.completed.includes(topic) ? r.completed.filter((t) => t !== topic) : [...r.completed, topic] })));
+=======
+    setCustomRoadmaps((prev) => prev.map((r) => r.id !== id ? r : ({ ...r, completed: r.completed.includes(topic) ? r.completed.filter((t) => t !== topic) : [...r.completed, topic] })));
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
   }
 
   // Browser Back first returns from inline MCQs to the subject cards.
@@ -1294,7 +1535,11 @@ const mcqs = MCQS[activeSubject] || [];
 
 
 
+<<<<<<< HEAD
       {section === "My Roadmaps" && <section className="bz-panel bz-custom-panel"><div className="bz-panel-heading"><div><span className="bz-eyebrow">YOUR PLAN, YOUR PACE</span><h2>My custom roadmaps</h2><p>Create a focused plan for a language or topic you want to prepare.</p></div></div><form className="bz-roadmap-form" onSubmit={createRoadmap}><label>Roadmap name<input value={roadmapName} onChange={(e) => setRoadmapName(e.target.value)} placeholder="e.g. Java interview basics" required /></label><label>Language<select value={roadmapLanguage} onChange={(e) => { setRoadmapLanguage(e.target.value); setRoadmapTopic(TOPICS[e.target.value][0]); }}>{LANGUAGES.map((l) => <option value={l.id} key={l.id}>{l.name}</option>)}</select></label><label>First topic<select value={roadmapTopic} onChange={(e) => setRoadmapTopic(e.target.value)}>{TOPICS[roadmapLanguage].map((t) => <option key={t}>{t}</option>)}</select></label><button className="bz-primary" type="submit">＋ Create roadmap</button></form><div className="bz-custom-roadmaps">{customRoadmaps.length === 0 ? <div className="bz-empty-state"><span>♧</span><h3>Your learning plan starts here</h3><p>Create a roadmap above, then check off topics as you complete them.</p></div> : customRoadmaps.map((roadmap) => { const pct = Math.round((roadmap.completed.length / Math.max(roadmap.topics.length, 1)) * 100); return <article className="bz-custom-roadmap-card" key={roadmap.id}><div className="bz-custom-roadmap-heading"><div><span className="bz-pill">{LANGUAGES.find((l) => l.id === roadmap.language)?.name}</span><h3>{roadmap.name}</h3></div><strong>{pct}%</strong></div><div className="bz-progress-track"><i style={{ width: `${pct}%` }} /></div>{roadmap.topics.map((topic) => <label className="bz-check-topic" key={topic}><input type="checkbox" checked={roadmap.completed.includes(topic)} onChange={() => toggleRoadmapTopic(roadmap.id, topic)} />{topic}</label>)}<button type="button" className="bz-text-button" onClick={() => { setCustomRoadmaps((prev) => prev.filter((r) => r.id !== roadmap.id)); setSaved((prev) => ({ ...prev, deletedRoadmapIds: [...new Set([...(prev.deletedRoadmapIds || []), String(roadmap.id)])] })); }}>Delete roadmap</button></article>; })}</div></section>}
+=======
+      {section === "My Roadmaps" && <section className="bz-panel bz-custom-panel"><div className="bz-panel-heading"><div><span className="bz-eyebrow">YOUR PLAN, YOUR PACE</span><h2>My custom roadmaps</h2><p>Create a focused plan for a language or topic you want to prepare.</p></div></div><form className="bz-roadmap-form" onSubmit={createRoadmap}><label>Roadmap name<input value={roadmapName} onChange={(e) => setRoadmapName(e.target.value)} placeholder="e.g. Java interview basics" required /></label><label>Language<select value={roadmapLanguage} onChange={(e) => { setRoadmapLanguage(e.target.value); setRoadmapTopic(TOPICS[e.target.value][0]); }}>{LANGUAGES.map((l) => <option value={l.id} key={l.id}>{l.name}</option>)}</select></label><label>First topic<select value={roadmapTopic} onChange={(e) => setRoadmapTopic(e.target.value)}>{TOPICS[roadmapLanguage].map((t) => <option key={t}>{t}</option>)}</select></label><button className="bz-primary" type="submit">＋ Create roadmap</button></form><div className="bz-custom-roadmaps">{customRoadmaps.length === 0 ? <div className="bz-empty-state"><span>♧</span><h3>Your learning plan starts here</h3><p>Create a roadmap above, then check off topics as you complete them.</p></div> : customRoadmaps.map((roadmap) => { const pct = Math.round((roadmap.completed.length / Math.max(roadmap.topics.length, 1)) * 100); return <article className="bz-custom-roadmap-card" key={roadmap.id}><div className="bz-custom-roadmap-heading"><div><span className="bz-pill">{LANGUAGES.find((l) => l.id === roadmap.language)?.name}</span><h3>{roadmap.name}</h3></div><strong>{pct}%</strong></div><div className="bz-progress-track"><i style={{ width: `${pct}%` }} /></div>{roadmap.topics.map((topic) => <label className="bz-check-topic" key={topic}><input type="checkbox" checked={roadmap.completed.includes(topic)} onChange={() => toggleRoadmapTopic(roadmap.id, topic)} />{topic}</label>)}<button type="button" className="bz-text-button" onClick={() => setCustomRoadmaps((prev) => prev.filter((r) => r.id !== roadmap.id))}>Delete roadmap</button></article>; })}</div></section>}
+>>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
       <p className="bz-footer-note">Progress on this first version is stored locally in your browser. Account-level sync can be connected to the existing backend next.</p>
     </div>
   );
