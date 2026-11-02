@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { useEffect, useState } from "react";
-=======
-import { useState } from "react";
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 import axios from "axios";
 import Editor from "@monaco-editor/react";
 import "./BeginnerZone.css";
@@ -151,37 +147,71 @@ function getUserStorageKey() {
 }
 function readSaved(storageKey) { try { return JSON.parse(localStorage.getItem(storageKey)) || {}; } catch { return {}; } }
 
+const DAILY_DRAFT_SUFFIX = "_daily_challenge_draft";
+function readDailyDraft(storageKey, dateKey, challengeId) {
+  try {
+    const saved = readSaved(storageKey);
+    const stored = saved.dailyChallengeDraft ||
+      JSON.parse(localStorage.getItem(`${storageKey}${DAILY_DRAFT_SUFFIX}`) || "null");
+    if (stored?.dateKey !== dateKey || stored?.challengeId !== challengeId) return {};
+    return stored.drafts || {};
+  } catch {
+    return {};
+  }
+}
+
 export default function DailyChallenge() {
   const storageKey = getUserStorageKey();
+  const initialDateKey = localDateKey();
+  const initialChallenge = getTodayChallenge();
   const [saved, setSaved] = useState(() => readSaved(storageKey));
   const [challengeLanguage, setChallengeLanguage] = useState("java");
-  const [challengeDrafts, setChallengeDrafts] = useState({});
+  const [challengeDrafts, setChallengeDrafts] = useState(() =>
+    readDailyDraft(storageKey, initialDateKey, initialChallenge.id)
+  );
   const [challengeOutput, setChallengeOutput] = useState("");
   const [challengeRunning, setChallengeRunning] = useState(false);
   const [showChallengeHint, setShowChallengeHint] = useState(false);
   const [challengeCompleted, setChallengeCompleted] = useState(() => readSaved(storageKey).dailyChallenges || {});
   const [challengeInput, setChallengeInput] = useState("");
-<<<<<<< HEAD
-  // Reload when progress from another device has been synced.
+// Reload when progress from another device has been synced.
   useEffect(() => {
     const reloadFromStorage = () => {
       const data = readSaved(storageKey);
       setSaved(data);
       setChallengeCompleted(data.dailyChallenges || {});
+      setChallengeDrafts(readDailyDraft(storageKey, localDateKey(), getTodayChallenge().id));
     };
     window.addEventListener("learncode:beginner-data-updated", reloadFromStorage);
     return () =>
       window.removeEventListener("learncode:beginner-data-updated", reloadFromStorage);
   }, [storageKey]);
-
-=======
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
   const activeDailyChallenge = getTodayChallenge();
   const dailyChallengeId = activeDailyChallenge.id;
   const todayKey = localDateKey();
   const now = new Date();
   const challengeDraftKey = `${todayKey}:${dailyChallengeId}:${challengeLanguage}`;
   const challengeCode = challengeDrafts[challengeDraftKey] ?? challengeStarter(dailyChallengeId, challengeLanguage);
+
+  // Save today's code automatically. When the date/question changes, the old
+  // draft is replaced, so the next day's challenge starts with fresh code.
+  useEffect(() => {
+    const todaysDrafts = Object.fromEntries(
+      Object.entries(challengeDrafts).filter(([key]) => key.startsWith(`${todayKey}:${dailyChallengeId}:`))
+    );
+    const draftRecord = {
+      dateKey: todayKey,
+      challengeId: dailyChallengeId,
+      drafts: todaysDrafts,
+    };
+    // Keep a legacy local copy and include the draft in beginnerZoneData so
+    // App.jsx can sync it to the signed-in account for other browsers/devices.
+    localStorage.setItem(`${storageKey}${DAILY_DRAFT_SUFFIX}`, JSON.stringify(draftRecord));
+    const freshSaved = readSaved(storageKey);
+    const nextSaved = { ...freshSaved, dailyChallengeDraft: draftRecord };
+    localStorage.setItem(storageKey, JSON.stringify(nextSaved));
+    setSaved(nextSaved);
+  }, [challengeDrafts, storageKey, todayKey, dailyChallengeId]);
   // Count each solved question once, at a fixed 10 points per unique challenge.
   const uniqueSolvedChallengeIds = new Set(
     Object.values(challengeCompleted)
@@ -211,11 +241,7 @@ export default function DailyChallenge() {
     setChallengeRunning(true); setChallengeOutput("Running your solution…");
     try {
       const API_BASE_URL = (
-<<<<<<< HEAD
-  import.meta.env.VITE_API_URL || (import.meta.env.DEV ? `http://${window.location.hostname}:5000` : "https://leancode.onrender.com")
-=======
-  import.meta.env.VITE_API_URL || "https://leancode.onrender.com"
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
+import.meta.env.VITE_API_URL || (import.meta.env.DEV ? `http://${window.location.hostname}:5000` : "https://leancode.onrender.com")
 ).replace(/\/+$/, "");
 
 const response = await axios.post(`${API_BASE_URL}/api/run`, {
@@ -227,15 +253,11 @@ const response = await axios.post(`${API_BASE_URL}/api/run`, {
       if (response.data.success && String(output).trim() === activeDailyChallenge.output.trim()) {
         const updated = { ...challengeCompleted, [todayKey]: { challengeId: activeDailyChallenge.id, title: activeDailyChallenge.title, points: 10, solvedAt: new Date().toISOString() } };
         setChallengeCompleted(updated);
-<<<<<<< HEAD
-        // Start from the freshest saved copy so progress synced from another device is kept.
+// Start from the freshest saved copy so synced progress is preserved.
         const freshSaved = readSaved(storageKey);
         const nextCompleted = { ...(freshSaved.dailyChallenges || {}), ...updated };
         const nextSaved = { ...freshSaved, dailyChallenges: nextCompleted };
         setChallengeCompleted(nextCompleted);
-=======
-        const nextSaved = { ...saved, dailyChallenges: updated };
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
         setSaved(nextSaved); localStorage.setItem(storageKey, JSON.stringify(nextSaved));
         setChallengeOutput(`${output}\n\n✓ Correct! You earned ${activeDailyChallenge.points} points.`);
       } else if (response.data.success) setChallengeOutput(`${output}\n\nOutput does not match the expected result yet. Check your solution and try again.`);

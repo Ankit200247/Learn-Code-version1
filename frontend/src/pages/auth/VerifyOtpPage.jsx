@@ -3,11 +3,10 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const API_URL = (
-<<<<<<< HEAD
-  import.meta.env.VITE_API_URL || (import.meta.env.DEV ? `http://${window.location.hostname}:5000` : "https://leancode.onrender.com")
-=======
-  import.meta.env.VITE_API_URL || "http://https://leancode.onrender.com"
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV
+    ? `http://${window.location.hostname}:5000`
+    : "https://leancode.onrender.com")
 ).replace(/\/$/, "");
 
 export default function VerifyOtpPage() {

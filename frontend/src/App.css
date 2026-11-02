@@ -2576,3 +2576,201 @@ samp {
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* =========================================
+   LEARN CODE DASHBOARD — RESPONSIVE FIX
+   Matches the actual Tailwind layout in App.jsx
+   ========================================= */
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+.lc-dashboard-main {
+  width: 100%;
+  min-width: 0;
+  max-width: 1600px;
+  box-sizing: border-box;
+}
+
+.lc-dashboard-hero {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.lc-dashboard-hero-title {
+  max-width: 100%;
+  font-size: clamp(2rem, 4.2vw, 3.5rem) !important;
+  line-height: 1.12 !important;
+  letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
+}
+
+.lc-dashboard-hero p {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* Tablet / browser zoom: sidebar remains expanded; hero text scales down. */
+@media (min-width: 768px) and (max-width: 1100px) {
+  .lc-dashboard-main {
+    padding: 1.25rem !important;
+  }
+
+  .lc-dashboard-hero-title {
+    font-size: clamp(2rem, 4vw, 3rem) !important;
+  }
+}
+
+/* Phone: use the existing hamburger + slide-in sidebar. */
+@media (max-width: 767px) {
+  .lc-dashboard-main {
+    padding: 1rem !important;
+  }
+
+  .lc-dashboard-hero {
+    padding: 1.25rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  .lc-dashboard-hero-title {
+    font-size: clamp(1.75rem, 7vw, 2.35rem) !important;
+    line-height: 1.14 !important;
+  }
+}
+
+/* ======================================================
+   Learn Code: restore deployed sidebar hover behaviour
+   Sidebar is compact by default and expands on hover.
+   The dashboard reserves exactly the same changing width.
+   ====================================================== */
+
+.lc-sidebar {
+  position: fixed !important;
+  inset: 0 auto 0 0 !important;
+  z-index: 40 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: 5rem !important;
+  min-width: 5rem !important;
+  max-width: 5rem !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  padding: 1.25rem 0.75rem !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+  background: #fff !important;
+  border-right: 1px solid #e2e8f0 !important;
+  transform: translateX(0) !important;
+  transition: width 260ms ease, min-width 260ms ease, max-width 260ms ease, padding 260ms ease, box-shadow 260ms ease !important;
+}
+
+.lc-sidebar:hover {
+  width: 18rem !important;
+  min-width: 18rem !important;
+  max-width: 18rem !important;
+  padding-right: 1.25rem !important;
+  padding-left: 1.25rem !important;
+  box-shadow: 12px 0 32px rgb(15 23 42 / 8%) !important;
+}
+
+/* Keep the dashboard aligned with the sidebar in both states. */
+.lc-dashboard-shell {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 100vh;
+  padding-left: 5rem !important;
+  box-sizing: border-box !important;
+  transition: padding-left 260ms ease !important;
+}
+
+.lc-sidebar:hover + .lc-dashboard-shell {
+  padding-left: 18rem !important;
+}
+
+.lc-dashboard-main {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 1600px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box !important;
+}
+
+.lc-dashboard-hero {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  padding: clamp(1.75rem, 3vw, 3rem) !important;
+  box-sizing: border-box !important;
+}
+
+.lc-dashboard-hero > .relative.z-10 {
+  width: 100%;
+  max-width: 52rem;
+  padding-left: 0.5rem;
+  box-sizing: border-box;
+}
+
+.lc-dashboard-hero-title {
+  max-width: 100% !important;
+  font-size: clamp(2rem, 3.4vw, 3.5rem) !important;
+  line-height: 1.12 !important;
+  overflow-wrap: break-word !important;
+}
+
+.lc-dashboard-hero p {
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+@media (min-width: 768px) and (max-width: 1100px) {
+  .lc-sidebar:hover {
+    width: 16rem !important;
+    min-width: 16rem !important;
+    max-width: 16rem !important;
+  }
+  .lc-sidebar:hover + .lc-dashboard-shell {
+    padding-left: 16rem !important;
+  }
+  .lc-dashboard-main { padding: 1.25rem !important; }
+  .lc-dashboard-hero-title { font-size: clamp(1.9rem, 3.6vw, 2.8rem) !important; }
+}
+
+/* Mobile keeps the existing hamburger-controlled drawer. */
+@media (max-width: 767px) {
+  .lc-sidebar {
+    width: min(18rem, 86vw) !important;
+    min-width: 0 !important;
+    max-width: 86vw !important;
+    padding: 1.25rem !important;
+    transform: translateX(-105%) !important;
+    transition: transform 220ms ease !important;
+  }
+  .lc-sidebar.translate-x-0 { transform: translateX(0) !important; }
+  .lc-sidebar.-translate-x-full { transform: translateX(-105%) !important; }
+  .lc-sidebar:hover {
+    width: min(18rem, 86vw) !important;
+    min-width: 0 !important;
+    max-width: 86vw !important;
+    padding: 1.25rem !important;
+  }
+  .lc-dashboard-shell,
+  .lc-sidebar:hover + .lc-dashboard-shell {
+    width: 100% !important;
+    padding-left: 0 !important;
+  }
+  .lc-dashboard-main { padding: 1rem !important; }
+  .lc-dashboard-hero { padding: 1.5rem !important; border-radius: 1.25rem !important; }
+  .lc-dashboard-hero > .relative.z-10 { padding-left: 0; }
+  .lc-dashboard-hero-title { font-size: clamp(1.75rem, 7vw, 2.35rem) !important; line-height: 1.14 !important; }
+}

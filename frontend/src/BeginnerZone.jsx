@@ -3,11 +3,7 @@ import Editor from "@monaco-editor/react";
 import axios from "axios";
 import "./BeginnerZone.css";
 const API_URL = (
-<<<<<<< HEAD
   import.meta.env.VITE_API_URL || (import.meta.env.DEV ? `http://${window.location.hostname}:5000` : "https://leancode.onrender.com")
-=======
-  import.meta.env.VITE_API_URL || "https://leancode.onrender.com"
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 ).replace(/\/+$/, "");
 
 const LANGUAGES = [
@@ -581,66 +577,7 @@ const PROGRAMS = [
 ];
 
 
-const DSA_PROGRAMS = [
-  { id:"dsa-two-sum", title:"Two Sum", topic:"Arrays · Hashing", difficulty:"Easy", conceptKey:"hello", description:"Given an array and a target, find the indices of two numbers that add up to the target.", mcq:{question:"Which data structure gives an average O(1) lookup for this problem?",options:["Stack","Hash map","Queue","Linked list"],answer:1}},
-  { id:"dsa-largest", title:"Largest Element in Array", topic:"Arrays", difficulty:"Easy", conceptKey:"hello", description:"Find the largest element in an integer array.", mcq:{question:"What is the time complexity of scanning the entire array once?",options:["O(1)","O(log n)","O(n)","O(n²)"],answer:2}},
-  { id:"dsa-smallest", title:"Smallest Element in Array", topic:"Arrays", difficulty:"Easy", conceptKey:"hello", description:"Return the minimum value in an array.", mcq:{question:"Which initial value is safest when finding the minimum?",options:["Always 0","The first array element","Array length","-1 in every case"],answer:1}},
-  { id:"dsa-reverse-array", title:"Reverse an Array", topic:"Arrays · Two Pointers", difficulty:"Easy", conceptKey:"hello", description:"Reverse an array in-place using two pointers.", mcq:{question:"Which approach reverses an array in-place?",options:["Swap left and right elements while moving inward","Sort the array","Use binary search","Only move the left pointer"],answer:0}},
-  { id:"dsa-second-largest", title:"Second Largest Element", topic:"Arrays", difficulty:"Easy", conceptKey:"hello", description:"Find the second-largest distinct value in an array.", mcq:{question:"To find the second-largest distinct value in one pass, what should you track?",options:["Only the smallest","Largest and second largest","Only the array length","Only the middle value"],answer:1}},
-  { id:"dsa-remove-duplicates", title:"Remove Duplicates from Sorted Array", topic:"Arrays · Two Pointers", difficulty:"Easy", conceptKey:"hello", description:"Remove duplicate values from a sorted array in-place.", mcq:{question:"Why is the two-pointer method useful here?",options:["It uses sorted order to keep unique values in-place","It sorts an unsorted array automatically","It uses recursion only","It guarantees O(log n) time"],answer:0}},
-  { id:"dsa-move-zeroes", title:"Move Zeroes", topic:"Arrays · Two Pointers", difficulty:"Easy", conceptKey:"hello", description:"Move all zeroes to the end while preserving the order of non-zero values.", mcq:{question:"What must remain unchanged?",options:["Positions of all zeroes","Relative order of non-zero elements","Array length must shrink","Array must be sorted"],answer:1}},
-  { id:"dsa-missing-number", title:"Missing Number", topic:"Arrays · Math", difficulty:"Easy", conceptKey:"hello", description:"Find the missing number from the range 0 to n.", mcq:{question:"Which formula gives the sum of integers from 0 through n?",options:["n × (n - 1) / 2","n × (n + 1) / 2","n² + 1","2 × n + 1"],answer:1}},
-  { id:"dsa-contains-duplicate", title:"Contains Duplicate", topic:"Arrays · Hashing", difficulty:"Easy", conceptKey:"hello", description:"Determine whether any value appears at least twice.", mcq:{question:"Which structure is a common efficient choice to detect repeats?",options:["Set","Queue only","Call stack only","Binary tree traversal only"],answer:0}},
-  { id:"dsa-max-subarray", title:"Maximum Subarray Sum", topic:"Arrays · Kadane's Algorithm", difficulty:"Medium", conceptKey:"hello", description:"Find the maximum sum of a non-empty contiguous subarray.", mcq:{question:"Which algorithm is commonly used for the linear-time solution?",options:["Dijkstra","Kadane's algorithm","BFS","Merge sort"],answer:1}},
-  { id:"dsa-best-time-stock", title:"Best Time to Buy and Sell Stock", topic:"Arrays · Greedy", difficulty:"Easy", conceptKey:"hello", description:"Choose one buy day and a later sell day to maximize profit.", mcq:{question:"What should be tracked while scanning prices?",options:["Maximum price only","Minimum price so far and best profit","Only current index","Array's median"],answer:1}},
-  { id:"dsa-binary-search", title:"Binary Search", topic:"Searching", difficulty:"Easy", conceptKey:"hello", description:"Find a target in a sorted array using binary search.", mcq:{question:"What is binary search's time complexity on a sorted array?",options:["O(n²)","O(n)","O(log n)","O(1) always"],answer:2}},
-  { id:"dsa-first-last", title:"First and Last Position", topic:"Searching · Binary Search", difficulty:"Medium", conceptKey:"hello", description:"Find the first and last index of a target in a sorted array.", mcq:{question:"How can both boundaries be found efficiently?",options:["Run linear search only","Use modified binary search twice","Use bubble sort","Use DFS"],answer:1}},
-  { id:"dsa-merge-sorted", title:"Merge Two Sorted Arrays", topic:"Arrays · Two Pointers", difficulty:"Easy", conceptKey:"hello", description:"Merge two sorted arrays into one sorted result.", mcq:{question:"What is the typical time complexity when merging arrays of lengths m and n?",options:["O(m + n)","O(m × n)","O(log m)","O(1)"],answer:0}},
-  { id:"dsa-rotate-array", title:"Rotate Array", topic:"Arrays", difficulty:"Medium", conceptKey:"hello", description:"Rotate an array to the right by k positions.", mcq:{question:"Before rotating by k, why is k often reduced modulo n?",options:["To sort the array","To handle rotations larger than the array length","To remove duplicates","To avoid using indexes"],answer:1}},
-  { id:"dsa-product-except-self", title:"Product of Array Except Self", topic:"Arrays · Prefix/Suffix", difficulty:"Medium", conceptKey:"hello", description:"Return an array where each position contains the product of all other elements.", mcq:{question:"Which technique can solve this without division?",options:["Prefix and suffix products","Binary search","BFS","Selection sort"],answer:0}},
-  { id:"dsa-valid-anagram", title:"Valid Anagram", topic:"Strings · Hashing", difficulty:"Easy", conceptKey:"hello", description:"Check whether two strings contain the same characters with the same frequencies.", mcq:{question:"What should match for two lowercase strings to be anagrams?",options:["Their first characters","Character frequency counts","Their lengths only","Their alphabetical order before sorting only"],answer:1}},
-  { id:"dsa-palindrome-string", title:"Valid Palindrome", topic:"Strings · Two Pointers", difficulty:"Easy", conceptKey:"hello", description:"Check whether a string is a palindrome, ignoring non-alphanumeric characters and case.", mcq:{question:"Which approach compares characters from both ends?",options:["Two pointers","BFS","Heap","Prefix sum"],answer:0}},
-  { id:"dsa-first-unique", title:"First Unique Character", topic:"Strings · Hashing", difficulty:"Easy", conceptKey:"hello", description:"Return the index of the first character that appears once.", mcq:{question:"What is a useful first step?",options:["Count each character's frequency","Sort and discard all characters","Reverse the string twice","Build a graph"],answer:0}},
-  { id:"dsa-longest-substring", title:"Longest Substring Without Repeating Characters", topic:"Strings · Sliding Window", difficulty:"Medium", conceptKey:"hello", description:"Find the length of the longest substring with all unique characters.", mcq:{question:"Which pattern is commonly used for an efficient solution?",options:["Sliding window","Bubble sort","Postorder traversal","Union only"],answer:0}},
-  { id:"dsa-valid-parentheses", title:"Valid Parentheses", topic:"Stack", difficulty:"Easy", conceptKey:"hello", description:"Check whether brackets are correctly opened and closed in the right order.", mcq:{question:"Which data structure is best suited for matching the most recent opening bracket?",options:["Queue","Stack","Min-heap","Hash-only sorting"],answer:1}},
-  { id:"dsa-implement-queue", title:"Implement Queue Using Stacks", topic:"Stack · Queue", difficulty:"Medium", conceptKey:"hello", description:"Implement FIFO queue operations using stacks.", mcq:{question:"What does FIFO mean?",options:["First In, First Out","First In, Final Out","Fast Input, Fast Output","First Index, First Operation"],answer:0}},
-  { id:"dsa-min-stack", title:"Min Stack", topic:"Stack", difficulty:"Medium", conceptKey:"hello", description:"Design a stack that supports push, pop, top and retrieving the minimum in constant time.", mcq:{question:"A common way to make getMin O(1) is to maintain what?",options:["A sorted copy after every operation only","An auxiliary stack of minimums","A queue of all values","A graph"],answer:1}},
-  { id:"dsa-linked-list-reverse", title:"Reverse a Linked List", topic:"Linked List", difficulty:"Easy", conceptKey:"hello", description:"Reverse the links in a singly linked list.", mcq:{question:"Which three references are commonly used in iterative reversal?",options:["prev, current, next","front, rear, size","root, left, right","low, mid, high"],answer:0}},
-  { id:"dsa-linked-list-cycle", title:"Linked List Cycle", topic:"Linked List · Two Pointers", difficulty:"Easy", conceptKey:"hello", description:"Detect whether a linked list contains a cycle.", mcq:{question:"Which algorithm uses slow and fast pointers?",options:["Floyd's cycle detection","Kadane's algorithm","Kruskal's algorithm","Counting sort"],answer:0}},
-  { id:"dsa-merge-lists", title:"Merge Two Sorted Linked Lists", topic:"Linked List", difficulty:"Easy", conceptKey:"hello", description:"Merge two sorted linked lists into one sorted list.", mcq:{question:"At each step, which node should be linked next?",options:["The smaller current node","Always the second list node","The last node in either list","A random node"],answer:0}},
-  { id:"dsa-middle-list", title:"Middle of Linked List", topic:"Linked List · Two Pointers", difficulty:"Easy", conceptKey:"hello", description:"Find the middle node of a linked list in one pass.", mcq:{question:"How do slow and fast pointers find the middle?",options:["Both move one node at a time","Slow moves one node, fast moves two","Fast moves backward","Slow jumps to the end"],answer:1}},
-  { id:"dsa-binary-tree-inorder", title:"Binary Tree Inorder Traversal", topic:"Trees · DFS", difficulty:"Easy", conceptKey:"hello", description:"Traverse a binary tree in left-root-right order.", mcq:{question:"What is the order for inorder traversal?",options:["Root-left-right","Left-root-right","Left-right-root","Right-root-left only"],answer:1}},
-  { id:"dsa-tree-level-order", title:"Binary Tree Level Order Traversal", topic:"Trees · BFS", difficulty:"Medium", conceptKey:"hello", description:"Visit tree nodes level by level from left to right.", mcq:{question:"Which data structure is normally used for level-order traversal?",options:["Queue","Stack only","Min-heap only","Hash set only"],answer:0}},
-  { id:"dsa-max-depth", title:"Maximum Depth of Binary Tree", topic:"Trees · DFS", difficulty:"Easy", conceptKey:"hello", description:"Compute the maximum number of nodes on a root-to-leaf path.", mcq:{question:"For a node, how is depth commonly computed recursively?",options:["1 + max(left depth, right depth)","left depth × right depth","left depth - right depth","Always 1"],answer:0}},
-  { id:"dsa-bst-search", title:"Search in a Binary Search Tree", topic:"Trees · BST", difficulty:"Easy", conceptKey:"hello", description:"Search for a value in a binary search tree.", mcq:{question:"If the target is smaller than the current node, where do you go?",options:["Right subtree","Left subtree","Always root","Stop immediately"],answer:1}},
-  { id:"dsa-number-islands", title:"Number of Islands", topic:"Graphs · DFS/BFS", difficulty:"Medium", conceptKey:"hello", description:"Count connected groups of land cells in a grid.", mcq:{question:"What is a standard way to explore each connected island?",options:["DFS or BFS","Binary search","Heap sort","Sliding window only"],answer:0}},
-  { id:"dsa-graph-bfs", title:"Breadth-First Search", topic:"Graphs · BFS", difficulty:"Easy", conceptKey:"hello", description:"Traverse a graph level by level from a starting vertex.", mcq:{question:"Which structure supports BFS traversal order?",options:["Queue","Stack only","Priority queue always","Array sorting"],answer:0}},
-  { id:"dsa-graph-dfs", title:"Depth-First Search", topic:"Graphs · DFS", difficulty:"Easy", conceptKey:"hello", description:"Explore a graph as deeply as possible before backtracking.", mcq:{question:"DFS is commonly implemented using recursion or which structure?",options:["Stack","Queue only","Deque sorted by value","Hash map only"],answer:0}},
-  { id:"dsa-topological-sort", title:"Course Schedule / Topological Sort", topic:"Graphs · Topological Sort", difficulty:"Medium", conceptKey:"hello", description:"Determine whether course prerequisites form a valid ordering.", mcq:{question:"Topological ordering applies to which kind of graph?",options:["Directed acyclic graph","Undirected complete graph only","Any graph with a cycle","A linked list only"],answer:0}},
-  { id:"dsa-heap-kth", title:"Kth Largest Element", topic:"Heap · Quickselect", difficulty:"Medium", conceptKey:"hello", description:"Find the kth largest value in an unsorted array.", mcq:{question:"Which data structure is useful for keeping the k largest values seen so far?",options:["Min-heap of size k","Queue of size one","Stack only","Trie only"],answer:0}},
-  { id:"dsa-merge-sort", title:"Merge Sort", topic:"Sorting", difficulty:"Medium", conceptKey:"hello", description:"Sort an array using divide and conquer.", mcq:{question:"What is merge sort's typical time complexity?",options:["O(n²)","O(n log n)","O(log n)","O(1)"],answer:1}},
-  { id:"dsa-quick-sort", title:"Quick Sort", topic:"Sorting", difficulty:"Medium", conceptKey:"hello", description:"Sort an array using pivot-based partitioning.", mcq:{question:"What is quicksort's average time complexity?",options:["O(n log n)","O(n²) always","O(log n)","O(1)"],answer:0}},
-  { id:"dsa-insertion-sort", title:"Insertion Sort", topic:"Sorting", difficulty:"Easy", conceptKey:"hello", description:"Sort a small array by inserting each element into its correct position in the sorted prefix.", mcq:{question:"What is insertion sort's worst-case time complexity?",options:["O(log n)","O(n)","O(n²)","O(1)"],answer:2}},
-  { id:"dsa-recursion-factorial", title:"Factorial Using Recursion", topic:"Recursion", difficulty:"Easy", conceptKey:"hello", description:"Compute n! recursively with a correct base case.", mcq:{question:"What is a necessary part of a recursive solution?",options:["Base case","Infinite loop","Global variable always","Sorting first"],answer:0}},
-  { id:"dsa-fibonacci", title:"Fibonacci Number", topic:"Recursion · Dynamic Programming", difficulty:"Easy", conceptKey:"hello", description:"Return the nth Fibonacci number.", mcq:{question:"Why can plain recursive Fibonacci be slow?",options:["It repeats many subproblems","It uses no function calls","It always runs in O(1)","It sorts the result"],answer:0}},
-  { id:"dsa-climbing-stairs", title:"Climbing Stairs", topic:"Dynamic Programming", difficulty:"Easy", conceptKey:"hello", description:"Count ways to reach step n when you can climb one or two steps.", mcq:{question:"Which recurrence describes the number of ways to reach step n?",options:["ways[n] = ways[n-1] + ways[n-2]","ways[n] = n² only","ways[n] = ways[n] - 1","ways[n] = 2n always"],answer:0}},
-  { id:"dsa-house-robber", title:"House Robber", topic:"Dynamic Programming", difficulty:"Medium", conceptKey:"hello", description:"Maximize the sum of non-adjacent values.", mcq:{question:"At each house, which choice is considered?",options:["Rob it plus best two houses back, or skip it","Always rob every house","Sort the values and take the first","Use BFS"],answer:0}},
-  { id:"dsa-coin-change", title:"Coin Change", topic:"Dynamic Programming", difficulty:"Medium", conceptKey:"hello", description:"Find the minimum number of coins needed to make a target amount, or report impossible.", mcq:{question:"What does a typical DP state dp[x] represent?",options:["Minimum coins needed to make amount x","Number of array indexes","Maximum graph degree","Sorted position of x"],answer:0}},
-  { id:"dsa-subset-sum", title:"Subset Sum", topic:"Dynamic Programming", difficulty:"Medium", conceptKey:"hello", description:"Determine whether a subset of numbers can sum to a target.", mcq:{question:"What makes subset sum a dynamic programming problem?",options:["Choices depend on earlier reachable sums","It always needs sorting only","It has no repeated states","It is a graph traversal by definition"],answer:0}},
-  { id:"dsa-permutations", title:"Generate Permutations", topic:"Backtracking", difficulty:"Medium", conceptKey:"hello", description:"Generate all arrangements of the input values.", mcq:{question:"What does backtracking do after exploring one choice?",options:["Undo the choice and explore another","Stop after the first choice always","Sort the input repeatedly","Delete all previous states"],answer:0}},
-  { id:"dsa-combination-sum", title:"Combination Sum", topic:"Backtracking", difficulty:"Medium", conceptKey:"hello", description:"Find combinations that sum to a target, reusing allowed candidates as specified.", mcq:{question:"Why is backtracking useful for combination problems?",options:["It explores choices and prunes invalid paths","It guarantees O(1) time","It avoids all recursion","It only works on sorted strings"],answer:0}},
-  { id:"dsa-lru-cache", title:"LRU Cache", topic:"Hashing · Linked List", difficulty:"Hard", conceptKey:"hello", description:"Design a cache with O(1) average get and put operations and least-recently-used eviction.", mcq:{question:"Which combination is commonly used for O(1) LRU operations?",options:["Hash map + doubly linked list","Queue + binary search","Stack + merge sort","Trie + DFS"],answer:0}},
-  { id:"dsa-trapping-rain", title:"Trapping Rain Water", topic:"Arrays · Two Pointers", difficulty:"Hard", conceptKey:"hello", description:"Calculate how much water can be trapped between elevation bars.", mcq:{question:"What information determines water above a position?",options:["Left maximum and right maximum boundaries","Only the current height","Array length alone","The sum of all heights only"],answer:0}},
-  { id:"dsa-median-two-arrays", title:"Median of Two Sorted Arrays", topic:"Binary Search", difficulty:"Hard", conceptKey:"hello", description:"Find the median of two sorted arrays in logarithmic time.", mcq:{question:"What is the target time complexity for the optimal solution?",options:["O(m + n)","O(m × n)","O(log(min(m,n)))","O(n²)"],answer:2}},
-  { id:"dsa-word-ladder", title:"Word Ladder", topic:"Graphs · BFS", difficulty:"Hard", conceptKey:"hello", description:"Find the shortest transformation sequence between two words using valid intermediate words.", mcq:{question:"Why is BFS appropriate for the shortest sequence when every transformation has equal cost?",options:["It explores states by increasing number of steps","It always uses less memory than DFS","It sorts all words","It only visits one node"],answer:0}},
-  { id:"dsa-dijkstra", title:"Dijkstra's Shortest Path", topic:"Graphs · Greedy", difficulty:"Medium", conceptKey:"hello", description:"Find shortest distances from a source in a graph with non-negative edge weights.", mcq:{question:"Dijkstra's algorithm assumes edge weights are:",options:["All negative","Non-negative","All equal to zero","Strings"],answer:1}},
-  { id:"dsa-union-find", title:"Number of Connected Components", topic:"Graphs · Union-Find", difficulty:"Medium", conceptKey:"hello", description:"Count connected components by joining vertices connected by edges.", mcq:{question:"Which data structure supports efficient union and find operations?",options:["Disjoint Set Union (DSU)","Queue only","Stack only","Prefix sum"],answer:0}}
-];
-
-const ALL_PROGRAMS = [
-  ...PROGRAMS.map((program) => ({ difficulty: "Easy", ...program })),
-  ...DSA_PROGRAMS
-];
+const ALL_PROGRAMS = PROGRAMS.map((program) => ({ difficulty: "Easy", ...program }));
 
 const DAILY_CHALLENGES = [
   { id: "sum-two", title: "Sum of Two Numbers", difficulty: "Easy", points: 10, topic: "Fundamentals", statement: "Read two integers and print their sum.", input: "7 5", output: "12", hint: "Read two values, add them, then print the result." },
@@ -849,69 +786,6 @@ function readSaved(storageKey) {
   try { return JSON.parse(localStorage.getItem(storageKey)) || {}; }
   catch { return {}; }
 }
-<<<<<<< HEAD
-=======
-function mergeLearningData(localData = {}, serverData = {}) {
-  const local = localData || {};
-  const server = serverData || {};
-
-  const merged = {
-    ...server,
-    ...local,
-
-    // Preserve completed modules from both devices.
-    completed: {
-      ...(server.completed || {}),
-      ...(local.completed || {}),
-    },
-
-    // Preserve question attempts from both devices.
-    attempts: {
-      ...(server.attempts || {}),
-      ...(local.attempts || {}),
-    },
-
-    // Preserve guided learning progress.
-    guidedCompleted: {
-      ...(server.guidedCompleted || {}),
-      ...(local.guidedCompleted || {}),
-    },
-  };
-
-  // Merge roadmaps without duplicating the same roadmap ID.
-  const roadmapMap = new Map();
-
-  [
-    ...(Array.isArray(server.customRoadmaps)
-      ? server.customRoadmaps
-      : []),
-
-    ...(Array.isArray(local.customRoadmaps)
-      ? local.customRoadmaps
-      : []),
-  ].forEach((roadmap) => {
-    if (roadmap?.id != null) {
-      const previous = roadmapMap.get(String(roadmap.id));
-
-      roadmapMap.set(String(roadmap.id), {
-        ...previous,
-        ...roadmap,
-        completed: [
-          ...new Set([
-            ...(previous?.completed || []),
-            ...(roadmap.completed || []),
-          ]),
-        ],
-      });
-    }
-  });
-
-  merged.customRoadmaps = [...roadmapMap.values()];
-
-  return merged;
-}
-
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 export default function BeginnerZone() {
   const storageKey = getUserStorageKey();
   const [language, setLanguage] = useState("java");
@@ -919,10 +793,6 @@ export default function BeginnerZone() {
   const [showPlacementQuestions, setShowPlacementQuestions] = useState(false);
   const [section, setSection] = useState("Guided Learning");
   const [saved, setSaved] = useState(() => readSaved(storageKey));
-<<<<<<< HEAD
-=======
-  const [syncReady, setSyncReady] = useState(false);
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
   const [topicFilter, setTopicFilter] = useState("All topics");
   const [mcqIndex, setMcqIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -987,7 +857,6 @@ const mcqs = MCQS[activeSubject] || [];
     };
   }), [completed, attempts]);
 
-<<<<<<< HEAD
   // Progress is saved in this browser immediately. The account-wide sync
   // (laptop <-> mobile) is handled once in App.jsx; it updates this data
   // and tells us through the "learncode:beginner-data-updated" event.
@@ -1012,159 +881,6 @@ const mcqs = MCQS[activeSubject] || [];
     return () =>
       window.removeEventListener("learncode:beginner-data-updated", reloadFromStorage);
   }, [storageKey]);
-=======
-  useEffect(() => {
-  let cancelled = false;
-
-  async function loadLearningProgress() {
-    const localData = {
-      ...readSaved(storageKey),
-    };
-
-    const token = localStorage.getItem("token");
-
-    // Without login, continue using local storage.
-    if (!token) {
-      if (!cancelled) {
-        setSaved(localData);
-        setCustomRoadmaps(
-          Array.isArray(localData.customRoadmaps)
-            ? localData.customRoadmaps
-            : []
-        );
-        setSyncReady(true);
-      }
-
-      return;
-    }
-
-    try {
-      const response = await axios.get(
-        `${API_URL}/api/learning-data`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          timeout: 20000,
-        }
-      );
-
-      if (!response.data?.success) {
-        throw new Error("Unable to load learning progress.");
-      }
-
-      if (cancelled) return;
-
-      const serverData =
-        response.data?.data?.beginnerZoneData || {};
-
-      // Merge existing laptop/mobile data with server data.
-      const mergedData = mergeLearningData(
-        localData,
-        serverData
-      );
-
-      setSaved(mergedData);
-
-      setCustomRoadmaps(
-        Array.isArray(mergedData.customRoadmaps)
-          ? mergedData.customRoadmaps
-          : []
-      );
-
-      // Save merged data locally after successful loading.
-      localStorage.setItem(
-        storageKey,
-        JSON.stringify(mergedData)
-      );
-    } catch (error) {
-      console.error(
-        "Learning progress sync error:",
-        error.response?.data || error.message
-      );
-
-      // Keep local data if the server is temporarily unavailable.
-      if (!cancelled) {
-        setSaved(localData);
-
-        setCustomRoadmaps(
-          Array.isArray(localData.customRoadmaps)
-            ? localData.customRoadmaps
-            : []
-        );
-      }
-    } finally {
-      if (!cancelled) {
-        setSyncReady(true);
-      }
-    }
-  }
-
-  loadLearningProgress();
-
-  return () => {
-    cancelled = true;
-  };
-}, [storageKey]);
-
-useEffect(() => {
-  // Never save before the initial load/merge finishes.
-  if (!syncReady) return;
-
-  const learningData = {
-    ...saved,
-    customRoadmaps,
-  };
-
-  // Save locally first.
-  try {
-    localStorage.setItem(
-      storageKey,
-      JSON.stringify(learningData)
-    );
-  } catch (error) {
-    console.error("Local progress save error:", error);
-  }
-
-  const token = localStorage.getItem("token");
-
-  // Guest users can only save locally.
-  if (!token) return;
-
-  // Debounce requests so every small state change
-  // does not immediately trigger a network request.
-  const timer = setTimeout(async () => {
-    try {
-      await axios.put(
-        `${API_URL}/api/learning-data`,
-        {
-          beginnerZoneData: learningData,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          timeout: 20000,
-        }
-      );
-
-      console.log("Learning progress synced successfully.");
-    } catch (error) {
-      console.error(
-        "Could not sync learning progress:",
-        error.response?.data || error.message
-      );
-    }
-  }, 800);
-
-  return () => clearTimeout(timer);
-}, [
-  saved,
-  customRoadmaps,
-  storageKey,
-  syncReady,
-]);
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 
 
   useEffect(() => {
@@ -1240,11 +956,7 @@ useEffect(() => {
       setRunning(true);
       setGuidedPracticeFeedback("Submitting your Java code to the compiler…");
       try {
-<<<<<<< HEAD
         const response = await axios.post(`${API_URL}/api/run`, {
-=======
-        const response = await axios.post("https://leancode.onrender.com/api/run", {
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
           code: typed,
           language: "java",
           input: "",
@@ -1316,11 +1028,7 @@ useEffect(() => {
     setRunning(true); setRunOutput("Running your code…");
     try {
       const response = await axios.post(
-<<<<<<< HEAD
   `${API_URL}/api/run`,
-=======
-  "https://leancode.onrender.com/api/run",
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
   { code, language, input: customInput }
 );
       setRunOutput(response.data.output || response.data.error || (response.data.success ? "Program finished successfully." : "Execution failed."));
@@ -1334,21 +1042,13 @@ useEffect(() => {
   function createRoadmap(e) {
     e.preventDefault();
     if (!roadmapName.trim()) return;
-<<<<<<< HEAD
     const newRoadmap = { id: Date.now(), name: roadmapName.trim(), language: roadmapLanguage, topics: [roadmapTopic], completed: [], updatedAt: new Date().toISOString() };
-=======
-    const newRoadmap = { id: Date.now(), name: roadmapName.trim(), language: roadmapLanguage, topics: [roadmapTopic], completed: [] };
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
     setCustomRoadmaps((prev) => [...prev, newRoadmap]);
     setRoadmapName("");
   }
 
   function toggleRoadmapTopic(id, topic) {
-<<<<<<< HEAD
     setCustomRoadmaps((prev) => prev.map((r) => r.id !== id ? r : ({ ...r, updatedAt: new Date().toISOString(), completed: r.completed.includes(topic) ? r.completed.filter((t) => t !== topic) : [...r.completed, topic] })));
-=======
-    setCustomRoadmaps((prev) => prev.map((r) => r.id !== id ? r : ({ ...r, completed: r.completed.includes(topic) ? r.completed.filter((t) => t !== topic) : [...r.completed, topic] })));
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
   }
 
   // Browser Back first returns from inline MCQs to the subject cards.
@@ -1531,15 +1231,11 @@ useEffect(() => {
 
       {section === "MCQ Practice" && <section className="bz-panel bz-practice-panel"><div className="bz-panel-heading"><div><span className="bz-eyebrow">QUICK PRACTICE</span><h2>MCQ Practice</h2><p>Check your understanding with syllabus-based questions.</p></div><span className="bz-pill">{mcqs.length} questions</span></div><div className="bz-filters"><span>Question {filteredMcqs.length ? safeMcqIndex + 1 : 0} of {filteredMcqs.length}</span></div>{currentMcq ? <div className="bz-question-layout"><div className="bz-question-card"><span className="bz-question-topic">{currentMcq.topic}</span><h3>{currentMcq.question}</h3><div className="bz-options">{currentMcq.options.map((option, i) => <button type="button" key={`${activeSubject}-${currentMcq.id}-${i}`} disabled={showExplanation} className={`bz-option ${selectedAnswer === i ? "chosen" : ""} ${showExplanation && i === correctAnswerIndex ? "correct" : ""} ${showExplanation && selectedAnswer === i && i !== correctAnswerIndex ? "incorrect" : ""}`} onClick={() => setSelectedAnswer(i)}><span>{String.fromCharCode(65 + i)}</span>{option}{showExplanation && i === correctAnswerIndex && <b>✓</b>}</button>)}</div>{showExplanation && <div className={`bz-explanation ${selectedAnswer === correctAnswerIndex ? "right" : "wrong"}`}><strong>{selectedAnswer === correctAnswerIndex ? "Correct! Nicely done." : "Not quite — keep learning."}</strong><p>{currentMcq.explanation}</p></div>}<div className="bz-question-actions"><small>Your progress is saved in this browser.</small>{showExplanation ? <button className="bz-primary" onClick={nextMcq}>Next question →</button> : <button className="bz-primary" disabled={selectedAnswer === null} onClick={answerMcq}>Check answer</button>}</div></div></div> : <p>No questions are available for this topic yet. Try another topic.</p>}</section>}
 
-      {section === "Basic Coding" && <section className="bz-panel bz-programs-panel"><div className="bz-panel-heading"><div><span className="bz-eyebrow">LEARN BY DOING</span><h2>Basic Coding</h2><p>Learn common beginner programs with questions, code examples in five languages, and expected output.</p></div><span className="bz-pill">Beginner · {LANGUAGES.find((l) => l.id === language)?.name}</span></div><div className="bz-program-layout bz-program-layout-refined"><aside className="bz-program-list bz-program-list-refined" aria-label="Coding and DSA practice questions"><div className="bz-program-list-heading"><strong>Practice questions</strong><span>{ALL_PROGRAMS.filter((program) => (saved.attempts || {})[program.id]).length}/{ALL_PROGRAMS.length} completed</span></div><div className="bz-program-filters"><input type="search" value={programSearch} onChange={(e) => setProgramSearch(e.target.value)} placeholder="Search DSA questions..." aria-label="Search coding questions" /><select value={programDifficulty} onChange={(e) => setProgramDifficulty(e.target.value)} aria-label="Filter by difficulty"><option value="All">All levels</option><option value="Easy">Easy</option><option value="Medium">Medium</option><option value="Hard">Hard</option></select></div>{ALL_PROGRAMS.filter((program) => (program.title + " " + program.topic).toLowerCase().includes(programSearch.toLowerCase()) && (programDifficulty === "All" || program.difficulty === programDifficulty)).map((program) => <button type="button" key={program.id} className={`bz-program-item ${activeProgram.id === program.id ? "selected" : ""} ${(saved.attempts || {})[program.id] ? "completed" : ""}`} onClick={() => { setActiveProgram(program); setProgramAnswer(null); setRunOutput(""); setProgramMode("mcq"); }}><span className="bz-program-check">{(saved.attempts || {})[program.id] ? "✓" : "○"}</span><span><strong>{program.title}</strong><small>{program.topic}</small><span className={`bz-difficulty bz-difficulty-${program.difficulty.toLowerCase()}`}>{program.difficulty}</span></span></button>)}</aside><div className="bz-program-work bz-program-work-refined"><div className="bz-program-work-heading"><div><span className="bz-eyebrow">SELECTED QUESTION</span><h3>{activeProgram.title}</h3></div><div className="bz-selected-badges"><span className="bz-pill">{activeProgram.topic}</span><span className={`bz-difficulty bz-difficulty-${activeProgram.difficulty.toLowerCase()}`}>{activeProgram.difficulty}</span></div></div><p>{activeProgram.description}</p><div className="bz-program-learning-layout"><div className="bz-program-question-side"><div className="bz-mode-switch"><button className={programMode === "mcq" ? "active" : ""} onClick={() => setProgramMode("mcq")}>Quick MCQ</button><button className={programMode === "code" ? "active" : ""} onClick={() => setProgramMode("code")}>Write code</button></div>{programMode === "mcq" ? <div className="bz-program-mcq"><strong>{activeProgram.mcq.question}</strong><div className="bz-options">{activeProgram.mcq.options.map((option, i) => <button type="button" key={`${activeProgram.id}-${i}`} className={`bz-option ${programAnswer === i ? "chosen" : ""} ${programAnswer !== null && i === activeProgram.mcq.answer ? "correct" : ""} ${programAnswer === i && programAnswer !== activeProgram.mcq.answer ? "incorrect" : ""}`} onClick={() => { setProgramAnswer(i); if (i === activeProgram.mcq.answer) setSaved((prev) => ({ ...prev, attempts: { ...(prev.attempts || {}), [activeProgram.id]: true }, completed: { ...(prev.completed || {}), [`${language}:${activeProgram.topic}`]: true } })); }}><span>{String.fromCharCode(65 + i)}</span>{option}{programAnswer !== null && i === activeProgram.mcq.answer && <b>✓</b>}</button>)}</div>{programAnswer !== null && <p className={`bz-inline-feedback ${programAnswer === activeProgram.mcq.answer ? "right" : "wrong"}`}>{programAnswer === activeProgram.mcq.answer ? "Correct answer! Topic progress updated." : "Not quite. Check the highlighted correct option and try to understand why."}</p>}</div> : <div className="bz-code-work"><div className="bz-editor-title"><span>main</span><span>{LANGUAGES.find((l) => l.id === language)?.name}</span></div><Editor height="300px" language={language === "cpp" ? "cpp" : language === "javascript" ? "javascript" : language} theme="vs-dark" value={code} onChange={(value) => setCode(value ?? "")} options={{ minimap: { enabled: false }, fontSize: 14, automaticLayout: true, scrollBeyondLastLine: false, wordWrap: "on" }} /><label className="bz-input-label">Custom input <textarea rows="2" value={customInput} onChange={(e) => setCustomInput(e.target.value)} placeholder="Optional input for your program" /></label><button className="bz-primary" onClick={runProgram} disabled={running}>{running ? "Running…" : "▶ Run code"}</button>{runOutput && <div className="bz-output"><strong>Output</strong><pre>{runOutput}</pre></div>}</div>}</div><div className="bz-program-example-side"><MultiLanguageExamples key={activeProgram.conceptKey || activeProgram.id} conceptKey={activeProgram.conceptKey || "hello"} /></div></div></div></div></section>}
+      {section === "Basic Coding" && <section className="bz-panel bz-programs-panel"><div className="bz-panel-heading"><div><span className="bz-eyebrow">LEARN BY DOING</span><h2>Basic Coding</h2><p>Learn common beginner programs with questions, code examples in five languages, and expected output.</p></div><span className="bz-pill">Beginner · {LANGUAGES.find((l) => l.id === language)?.name}</span></div><div className="bz-program-layout bz-program-layout-refined"><aside className="bz-program-list bz-program-list-refined" aria-label="Beginner coding practice questions"><div className="bz-program-list-heading"><strong>Practice questions</strong><span>{ALL_PROGRAMS.filter((program) => (saved.attempts || {})[program.id]).length}/{ALL_PROGRAMS.length} completed</span></div><div className="bz-program-filters"><input type="search" value={programSearch} onChange={(e) => setProgramSearch(e.target.value)} placeholder="Search beginner programs..." aria-label="Search coding questions" /><select value={programDifficulty} onChange={(e) => setProgramDifficulty(e.target.value)} aria-label="Filter by difficulty"><option value="All">All levels</option><option value="Easy">Easy</option><option value="Medium">Medium</option><option value="Hard">Hard</option></select></div>{ALL_PROGRAMS.filter((program) => (program.title + " " + program.topic).toLowerCase().includes(programSearch.toLowerCase()) && (programDifficulty === "All" || program.difficulty === programDifficulty)).map((program) => <button type="button" key={program.id} className={`bz-program-item ${activeProgram.id === program.id ? "selected" : ""} ${(saved.attempts || {})[program.id] ? "completed" : ""}`} onClick={() => { setActiveProgram(program); setProgramAnswer(null); setRunOutput(""); setProgramMode("mcq"); }}><span className="bz-program-check">{(saved.attempts || {})[program.id] ? "✓" : "○"}</span><span><strong>{program.title}</strong><small>{program.topic}</small><span className={`bz-difficulty bz-difficulty-${program.difficulty.toLowerCase()}`}>{program.difficulty}</span></span></button>)}</aside><div className="bz-program-work bz-program-work-refined"><div className="bz-program-work-heading"><div><span className="bz-eyebrow">SELECTED QUESTION</span><h3>{activeProgram.title}</h3></div><div className="bz-selected-badges"><span className="bz-pill">{activeProgram.topic}</span><span className={`bz-difficulty bz-difficulty-${activeProgram.difficulty.toLowerCase()}`}>{activeProgram.difficulty}</span></div></div><p>{activeProgram.description}</p><div className="bz-program-learning-layout"><div className="bz-program-question-side"><div className="bz-mode-switch"><button className={programMode === "mcq" ? "active" : ""} onClick={() => setProgramMode("mcq")}>Quick MCQ</button><button className={programMode === "code" ? "active" : ""} onClick={() => setProgramMode("code")}>Write code</button></div>{programMode === "mcq" ? <div className="bz-program-mcq"><strong>{activeProgram.mcq.question}</strong><div className="bz-options">{activeProgram.mcq.options.map((option, i) => <button type="button" key={`${activeProgram.id}-${i}`} className={`bz-option ${programAnswer === i ? "chosen" : ""} ${programAnswer !== null && i === activeProgram.mcq.answer ? "correct" : ""} ${programAnswer === i && programAnswer !== activeProgram.mcq.answer ? "incorrect" : ""}`} onClick={() => { setProgramAnswer(i); if (i === activeProgram.mcq.answer) setSaved((prev) => ({ ...prev, attempts: { ...(prev.attempts || {}), [activeProgram.id]: true }, completed: { ...(prev.completed || {}), [`${language}:${activeProgram.topic}`]: true } })); }}><span>{String.fromCharCode(65 + i)}</span>{option}{programAnswer !== null && i === activeProgram.mcq.answer && <b>✓</b>}</button>)}</div>{programAnswer !== null && <p className={`bz-inline-feedback ${programAnswer === activeProgram.mcq.answer ? "right" : "wrong"}`}>{programAnswer === activeProgram.mcq.answer ? "Correct answer! Topic progress updated." : "Not quite. Check the highlighted correct option and try to understand why."}</p>}</div> : <div className="bz-code-work"><div className="bz-editor-title"><span>main</span><span>{LANGUAGES.find((l) => l.id === language)?.name}</span></div><Editor height="300px" language={language === "cpp" ? "cpp" : language === "javascript" ? "javascript" : language} theme="vs-dark" value={code} onChange={(value) => setCode(value ?? "")} options={{ minimap: { enabled: false }, fontSize: 14, automaticLayout: true, scrollBeyondLastLine: false, wordWrap: "on" }} /><label className="bz-input-label">Custom input <textarea rows="2" value={customInput} onChange={(e) => setCustomInput(e.target.value)} placeholder="Optional input for your program" /></label><button className="bz-primary" onClick={runProgram} disabled={running}>{running ? "Running…" : "▶ Run code"}</button>{runOutput && <div className="bz-output"><strong>Output</strong><pre>{runOutput}</pre></div>}</div>}</div><div className="bz-program-example-side"><MultiLanguageExamples key={activeProgram.conceptKey || activeProgram.id} conceptKey={activeProgram.conceptKey || "hello"} /></div></div></div></div></section>}
 
 
 
-<<<<<<< HEAD
       {section === "My Roadmaps" && <section className="bz-panel bz-custom-panel"><div className="bz-panel-heading"><div><span className="bz-eyebrow">YOUR PLAN, YOUR PACE</span><h2>My custom roadmaps</h2><p>Create a focused plan for a language or topic you want to prepare.</p></div></div><form className="bz-roadmap-form" onSubmit={createRoadmap}><label>Roadmap name<input value={roadmapName} onChange={(e) => setRoadmapName(e.target.value)} placeholder="e.g. Java interview basics" required /></label><label>Language<select value={roadmapLanguage} onChange={(e) => { setRoadmapLanguage(e.target.value); setRoadmapTopic(TOPICS[e.target.value][0]); }}>{LANGUAGES.map((l) => <option value={l.id} key={l.id}>{l.name}</option>)}</select></label><label>First topic<select value={roadmapTopic} onChange={(e) => setRoadmapTopic(e.target.value)}>{TOPICS[roadmapLanguage].map((t) => <option key={t}>{t}</option>)}</select></label><button className="bz-primary" type="submit">＋ Create roadmap</button></form><div className="bz-custom-roadmaps">{customRoadmaps.length === 0 ? <div className="bz-empty-state"><span>♧</span><h3>Your learning plan starts here</h3><p>Create a roadmap above, then check off topics as you complete them.</p></div> : customRoadmaps.map((roadmap) => { const pct = Math.round((roadmap.completed.length / Math.max(roadmap.topics.length, 1)) * 100); return <article className="bz-custom-roadmap-card" key={roadmap.id}><div className="bz-custom-roadmap-heading"><div><span className="bz-pill">{LANGUAGES.find((l) => l.id === roadmap.language)?.name}</span><h3>{roadmap.name}</h3></div><strong>{pct}%</strong></div><div className="bz-progress-track"><i style={{ width: `${pct}%` }} /></div>{roadmap.topics.map((topic) => <label className="bz-check-topic" key={topic}><input type="checkbox" checked={roadmap.completed.includes(topic)} onChange={() => toggleRoadmapTopic(roadmap.id, topic)} />{topic}</label>)}<button type="button" className="bz-text-button" onClick={() => { setCustomRoadmaps((prev) => prev.filter((r) => r.id !== roadmap.id)); setSaved((prev) => ({ ...prev, deletedRoadmapIds: [...new Set([...(prev.deletedRoadmapIds || []), String(roadmap.id)])] })); }}>Delete roadmap</button></article>; })}</div></section>}
-=======
-      {section === "My Roadmaps" && <section className="bz-panel bz-custom-panel"><div className="bz-panel-heading"><div><span className="bz-eyebrow">YOUR PLAN, YOUR PACE</span><h2>My custom roadmaps</h2><p>Create a focused plan for a language or topic you want to prepare.</p></div></div><form className="bz-roadmap-form" onSubmit={createRoadmap}><label>Roadmap name<input value={roadmapName} onChange={(e) => setRoadmapName(e.target.value)} placeholder="e.g. Java interview basics" required /></label><label>Language<select value={roadmapLanguage} onChange={(e) => { setRoadmapLanguage(e.target.value); setRoadmapTopic(TOPICS[e.target.value][0]); }}>{LANGUAGES.map((l) => <option value={l.id} key={l.id}>{l.name}</option>)}</select></label><label>First topic<select value={roadmapTopic} onChange={(e) => setRoadmapTopic(e.target.value)}>{TOPICS[roadmapLanguage].map((t) => <option key={t}>{t}</option>)}</select></label><button className="bz-primary" type="submit">＋ Create roadmap</button></form><div className="bz-custom-roadmaps">{customRoadmaps.length === 0 ? <div className="bz-empty-state"><span>♧</span><h3>Your learning plan starts here</h3><p>Create a roadmap above, then check off topics as you complete them.</p></div> : customRoadmaps.map((roadmap) => { const pct = Math.round((roadmap.completed.length / Math.max(roadmap.topics.length, 1)) * 100); return <article className="bz-custom-roadmap-card" key={roadmap.id}><div className="bz-custom-roadmap-heading"><div><span className="bz-pill">{LANGUAGES.find((l) => l.id === roadmap.language)?.name}</span><h3>{roadmap.name}</h3></div><strong>{pct}%</strong></div><div className="bz-progress-track"><i style={{ width: `${pct}%` }} /></div>{roadmap.topics.map((topic) => <label className="bz-check-topic" key={topic}><input type="checkbox" checked={roadmap.completed.includes(topic)} onChange={() => toggleRoadmapTopic(roadmap.id, topic)} />{topic}</label>)}<button type="button" className="bz-text-button" onClick={() => setCustomRoadmaps((prev) => prev.filter((r) => r.id !== roadmap.id))}>Delete roadmap</button></article>; })}</div></section>}
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
       <p className="bz-footer-note">Progress on this first version is stored locally in your browser. Account-level sync can be connected to the existing backend next.</p>
     </div>
   );

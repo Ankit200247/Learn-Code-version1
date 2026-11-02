@@ -2,16 +2,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import axios from "axios";
-<<<<<<< HEAD
-import { useCloudField, mergeById } from "../../cloudSync.js";
-
 const API_URL = (
-  import.meta.env.VITE_API_URL || (import.meta.env.DEV ? `http://${window.location.hostname}:5000` : "https://leancode.onrender.com")
-=======
-
-const API_URL = (
-  import.meta.env.VITE_API_URL || "https://leancode.onrender.com"
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV
+    ? `http://${window.location.hostname}:5000`
+    : "https://leancode.onrender.com")
 ).replace(/\/$/, "");
 
 const CONVERSATIONS_KEY = "techpath_ai_conversations";
@@ -80,7 +75,6 @@ function getToken() {
   return localStorage.getItem("token") || "";
 }
 
-<<<<<<< HEAD
 // Chats are stored per account so two accounts in one browser never mix.
 function currentUserId() {
   try {
@@ -146,15 +140,7 @@ function normalizeChats(list) {
 
 function readConversations() {
   try {
-    const saved = JSON.parse(
-      readScoped(CONVERSATIONS_KEY) || "null"
-=======
-function readConversations() {
-  try {
-    const saved = JSON.parse(
-      localStorage.getItem(CONVERSATIONS_KEY) || "null"
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
-    );
+    const saved = JSON.parse(readScoped(CONVERSATIONS_KEY) || "null");
 
     if (Array.isArray(saved)) {
       return saved
@@ -225,11 +211,7 @@ function readConversations() {
 
 function readActiveChatId(conversations) {
   try {
-<<<<<<< HEAD
     const id = readScoped(ACTIVE_CHAT_KEY);
-=======
-    const id = localStorage.getItem(ACTIVE_CHAT_KEY);
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 
     if (id && conversations.some((chat) => chat.id === id)) {
       return id;
@@ -586,12 +568,6 @@ export default function AiAssistantPage({ onNavigate }) {
 
   const messages = activeChat?.messages || [];
 
-<<<<<<< HEAD
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        scopedKey(CONVERSATIONS_KEY),
-=======
   // Load this signed-in user's chat history from MongoDB.
   useEffect(() => {
     let cancelled = false;
@@ -613,38 +589,9 @@ export default function AiAssistantPage({ onNavigate }) {
         if (cancelled) return;
 
         const serverChats = response.data?.data?.aiAssistantChats;
-        const validServerChats = Array.isArray(serverChats)
-          ? serverChats
-              .filter(
-                (chat) =>
-                  chat &&
-                  typeof chat.id === "string" &&
-                  Array.isArray(chat.messages)
-              )
-              .map((chat) => ({
-                ...chat,
-                title: chat.title || "New conversation",
-                messages: chat.messages
-                  .filter(
-                    (message) =>
-                      ["user", "assistant"].includes(message.role) &&
-                      typeof message.content === "string"
-                  )
-                  .slice(-MAX_MESSAGES),
-              }))
-              .sort(
-                (a, b) =>
-                  new Date(b.updatedAt || b.createdAt || 0).getTime() -
-                  new Date(a.updatedAt || a.createdAt || 0).getTime()
-              )
-              .slice(0, MAX_CONVERSATIONS)
-          : [];
-
-        // Prefer cloud data when it exists. If the account has no saved chats
-        // yet, keep the existing browser history so it can be migrated.
+        const validServerChats = normalizeChats(serverChats);
         const localChats = readConversations();
-        const nextChats =
-          validServerChats.length > 0 ? validServerChats : localChats;
+        const nextChats = validServerChats.length > 0 ? validServerChats : localChats;
 
         setConversations(nextChats);
         setActiveChatId((currentId) =>
@@ -671,52 +618,24 @@ export default function AiAssistantPage({ onNavigate }) {
     };
   }, []);
 
+  // Save locally under the current account, and sync signed-in chats to MongoDB.
   useEffect(() => {
+    if (!serverLoadedRef.current) return;
+
     try {
       localStorage.setItem(
-        CONVERSATIONS_KEY,
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
+        scopedKey(CONVERSATIONS_KEY),
         JSON.stringify(conversations.slice(0, MAX_CONVERSATIONS))
       );
 
       if (activeChatId) {
-<<<<<<< HEAD
         localStorage.setItem(scopedKey(ACTIVE_CHAT_KEY), activeChatId);
       } else {
         localStorage.removeItem(scopedKey(ACTIVE_CHAT_KEY));
-=======
-        localStorage.setItem(ACTIVE_CHAT_KEY, activeChatId);
-      } else {
-        localStorage.removeItem(ACTIVE_CHAT_KEY);
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
       }
     } catch {
       setError("Chat history could not be saved in browser storage.");
     }
-  }, [conversations, activeChatId]);
-
-<<<<<<< HEAD
-  // Keep this account's chats the same on every device (laptop, mobile...).
-  useCloudField({
-    field: "aiAssistantChats",
-    enabled: Boolean(getToken()),
-    userKey: currentUserId(),
-    value: conversations,
-    onRemote: (next) => {
-      const chats = normalizeChats(next);
-      setConversations(chats);
-      setActiveChatId((currentId) =>
-        chats.some((chat) => chat.id === currentId)
-          ? currentId
-          : chats[0]?.id || ""
-      );
-    },
-    merge: (local, server) => normalizeChats(mergeById(local, server)),
-  });
-=======
-  // Save changes to the authenticated user's MongoDB record (debounced).
-  useEffect(() => {
-    if (!serverLoadedRef.current) return;
 
     const token = getToken();
     if (!token) return;
@@ -729,9 +648,7 @@ export default function AiAssistantPage({ onNavigate }) {
       try {
         await axios.put(
           `${API_URL}/api/learning-data`,
-          {
-            aiAssistantChats: conversations.slice(0, MAX_CONVERSATIONS),
-          },
+          { aiAssistantChats: conversations.slice(0, MAX_CONVERSATIONS) },
           {
             headers: { Authorization: `Bearer ${token}` },
             timeout: 20000,
@@ -750,9 +667,7 @@ export default function AiAssistantPage({ onNavigate }) {
         window.clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [conversations]);
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
-
+  }, [conversations, activeChatId]);
   useEffect(() => {
     bottomRef.current?.scrollIntoView({
       behavior: "smooth",
