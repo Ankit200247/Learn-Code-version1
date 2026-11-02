@@ -15,7 +15,6 @@ import LearningData from "./models/LearningData.js";
 
 dotenv.config();
 
-<<<<<<< HEAD
 // DNS: use the system resolver first. If the MongoDB SRV lookup fails
 // (common on some ISPs/hotspots) connectMongoDB() retries with Google DNS.
 let googleDnsApplied = false;
@@ -25,10 +24,6 @@ function applyGoogleDns() {
   googleDnsApplied = true;
   console.warn("Retrying MongoDB with public DNS servers...");
 }
-=======
-// DNS fix for environments where the default resolver fails.
-dns.setServers(["8.8.8.8", "8.8.4.4"]);
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
@@ -37,7 +32,6 @@ const PORT = Number(process.env.PORT) || 5000;
 // MIDDLEWARE
 // --------------------------------------------------
 
-<<<<<<< HEAD
 const allowedOrigins = [
   "https://learn-code-frontend-xu8j.onrender.com",
   ...(process.env.CLIENT_URL
@@ -63,19 +57,6 @@ const corsOptions = {
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   optionsSuccessStatus: 204,
-=======
-    const allowedOrigins = [
-  "http://localhost:5173",
-  "https://learn-code-frontend-xu8j.onrender.com"
-];
-
-const corsOptions = {
-  origin: "https://learn-code-frontend-xu8j.onrender.com",
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  optionsSuccessStatus: 204
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 };
 
 app.use(cors(corsOptions));
@@ -167,7 +148,6 @@ async function connectMongoDB() {
     } catch (error) {
       mongoConnected = false;
 
-<<<<<<< HEAD
       // DNS (SRV) failure -> retry once using public DNS servers.
       if (
         !googleDnsApplied &&
@@ -189,22 +169,17 @@ async function connectMongoDB() {
         }
       }
 
-=======
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
       console.error(
         "MongoDB connection failed:",
         error.message
       );
 
-<<<<<<< HEAD
       if (/whitelist|IP|not authorized|ReplicaSetNoPrimary|Server selection/i.test(error.message)) {
         console.error(
           "HINT: In MongoDB Atlas -> Network Access, add your current IP (or 0.0.0.0/0 for testing)."
         );
       }
 
-=======
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
       if (error.code) {
         console.error("MongoDB error code:", error.code);
       }
@@ -825,7 +800,6 @@ app.get("/api/auth/me", requireAuth, async (req, res) => {
 // --------------------------------------------------
 // GET USER LEARNING DATA
 // --------------------------------------------------
-<<<<<<< HEAD
 const LEARNING_FIELDS = {
   customRoadmaps: [],
   completedModules: [],
@@ -836,8 +810,6 @@ const LEARNING_FIELDS = {
   aiMentorChats: [],
 };
 
-=======
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 app.get("/api/learning-data", requireAuth, async (req, res) => {
   try {
     if (!databaseReady(res)) return;
@@ -846,7 +818,6 @@ app.get("/api/learning-data", requireAuth, async (req, res) => {
       user: req.userId,
     }).lean();
 
-<<<<<<< HEAD
     const out = {};
     for (const [field, fallback] of Object.entries(LEARNING_FIELDS)) {
       out[field] = data?.[field] ?? fallback;
@@ -858,21 +829,6 @@ app.get("/api/learning-data", requireAuth, async (req, res) => {
       versions: data?.fieldVersions || {},
       data: out,
     });
-=======
-    return res.json({
-  success: true,
-  exists: Boolean(data),
-  data: {
-    customRoadmaps: data?.customRoadmaps ?? [],
-    completedModules: data?.completedModules ?? [],
-    roadmapLearningState: data?.roadmapLearningState ?? {},
-    beginnerZoneData: data?.beginnerZoneData ?? {},
-    submissions: data?.submissions ?? {},
-    aiAssistantChats: data?.aiAssistantChats ?? [],
-    aiMentorChats: data?.aiMentorChats ?? [],
-  },
-});
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
   } catch (error) {
     console.error("Get learning data error:", error.message);
 
@@ -883,7 +839,6 @@ app.get("/api/learning-data", requireAuth, async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 // Cheap endpoint used by devices to check whether anything changed.
 app.get("/api/learning-data/versions", requireAuth, async (req, res) => {
   try {
@@ -915,16 +870,10 @@ app.get("/api/learning-data/versions", requireAuth, async (req, res) => {
 //   is still the newest version. Otherwise the field is returned in
 //   `conflicts` so the client can merge and retry (no silent overwrite).
 // - Old clients that send no baseVersions keep the previous behaviour.
-=======
-// --------------------------------------------------
-// SAVE USER LEARNING DATA
-// --------------------------------------------------
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 app.put("/api/learning-data", requireAuth, async (req, res) => {
   try {
     if (!databaseReady(res)) return;
 
-<<<<<<< HEAD
     const body = req.body || {};
     const baseVersions =
       body.baseVersions && typeof body.baseVersions === "object"
@@ -997,48 +946,12 @@ app.put("/api/learning-data", requireAuth, async (req, res) => {
       versions[field] = updated.fieldVersions?.[field] || 0;
       doc = updated;
     }
-=======
-    const {
-  customRoadmaps,
-  completedModules,
-  roadmapLearningState,
-  beginnerZoneData,
-  submissions,
-  aiAssistantChats,
-  aiMentorChats,
-} = req.body || {};
-
-    const data = await LearningData.findOneAndUpdate(
-      { user: req.userId },
-      {
-        $set: {
-          user: req.userId,
-          ...(customRoadmaps !== undefined && { customRoadmaps }),
-          ...(completedModules !== undefined && { completedModules }),
-          ...(roadmapLearningState !== undefined && { roadmapLearningState }),
-          ...(beginnerZoneData !== undefined && { beginnerZoneData }),
-          ...(submissions !== undefined && { submissions }),
-          ...(aiAssistantChats !== undefined && { aiAssistantChats }),
-          ...(aiMentorChats !== undefined && { aiMentorChats }),
-        },
-      },
-      {
-        new: true,
-        upsert: true,
-        runValidators: true,
-        setDefaultsOnInsert: true,
-      }
-    );
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 
     return res.json({
       success: true,
       message: "Learning data saved successfully.",
-<<<<<<< HEAD
       versions,
       conflicts,
-=======
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
     });
   } catch (error) {
     console.error("Save learning data error:", error.message);
@@ -1847,42 +1760,36 @@ app.post("/api/ai/chat", async (req, res) => {
       .join("\n\n");
 
     const prompt = `
-You are Learn Code, a helpful programming and learning assistant.
+You are Learn Code AI, an intelligent and friendly general-purpose AI assistant.
 
-IMPORTANT CONVERSATION RULES:
-1. Maintain context from the entire supplied conversation.
-2. Answer follow-up questions using previous messages.
-3. Resolve references such as "it", "that code",
-   "the previous answer", "explain this" and "continue".
-4. Do not treat every message as a new conversation.
-5. If the user asks to modify earlier code, use the
-   earlier code and requirements as context.
-6. Do not invent details that are not available.
-7. Explain programming concepts clearly.
-8. Use examples when helpful.
-9. Answer the latest question directly.
-10. If earlier context is insufficient, ask a focused
-    clarification instead of guessing.
-IMPORTANT ANSWER COMPLETION RULES:
-1. Answer the user's question completely.
-2. When providing code, always provide a complete, runnable solution.
-3. Include all required imports, class declarations, methods,
-   main function when applicable, and closing braces.
-4. Never stop in the middle of a code block.
-5. Do not replace the remaining code with comments such as
-   "// rest of the code".
-6. Keep explanations concise when necessary to ensure the
-   complete code is included.
-7. Before finishing, verify that all code blocks are closed
-   and the solution is complete.
+You can answer questions about ANY topic, including:
+- Programming, Java, Python, C++, JavaScript, DSA and web development.
+- Science, mathematics, technology and engineering.
+- General knowledge, history, geography and current affairs.
+- Education, careers, jobs and interview preparation.
+- English, grammar, writing, translation and communication.
+- Business, finance, daily life and other general topics.
+
+IMPORTANT RULES:
+1. Never restrict your answers to programming topics.
+2. Understand the user's actual question before answering.
+3. Give relevant and accurate answers.
+4. Maintain conversation context and understand follow-up questions.
+5. If the user greets you, respond naturally.
+6. If the user asks for code, provide complete runnable code.
+7. Explain difficult topics in simple language.
+8. If the question is unclear, ask for clarification.
+9. Never give an unrelated or fixed response.
+10. Never make up facts. Be honest if you don't know something.
+11. Reply in the language used by the user whenever possible.
+
 CONVERSATION HISTORY:
 ${conversation || "(No previous conversation)"}
 
 LATEST USER MESSAGE:
 ${message.trim()}
 
-Respond to the latest user message while preserving
-the conversation's context.
+Answer the latest user message directly and helpfully.
 `;
 
     const answer = await generateAIResponse(prompt);
@@ -2110,11 +2017,7 @@ async function startServer() {
   // The API server can still run if MongoDB is offline.
   await connectMongoDB();
 
-<<<<<<< HEAD
   const httpServer = app.listen(PORT, "0.0.0.0", () => {
-=======
-  app.listen(PORT, () => {
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
     console.log(
       `\nLearn Code backend running on http://localhost:${PORT}`
     );
@@ -2143,7 +2046,6 @@ async function startServer() {
       `MongoDB connected: ${mongoConnected}\n`
     );
   });
-<<<<<<< HEAD
 
   httpServer.on("error", (err) => {
     if (err.code === "EADDRINUSE") {
@@ -2155,8 +2057,6 @@ async function startServer() {
     }
     process.exit(1);
   });
-=======
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 }
 
 startServer();

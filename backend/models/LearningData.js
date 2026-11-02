@@ -51,7 +51,6 @@ const learningDataSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       default: [],
     },
-<<<<<<< HEAD
 
     // Per-field revision counters. They let every device detect when
     // another device saved newer data, so one device never silently
@@ -60,8 +59,6 @@ const learningDataSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       default: {},
     },
-=======
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
   },
   {
     timestamps: true,

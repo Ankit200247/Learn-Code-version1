@@ -18,7 +18,6 @@ import {
 } from "recharts";
 import BeginnerZone from "./BeginnerZone";
 import DailyChallenge from "./DailyChallenge";
-<<<<<<< HEAD
 import {
   useCloudField,
   mergeById,
@@ -30,12 +29,7 @@ import {
 
 const API_URL = (
   import.meta.env.VITE_API_URL || (import.meta.env.DEV ? `http://${window.location.hostname}:5000` : "https://leancode.onrender.com")
-=======
 
-
-const API_URL = (
-  import.meta.env.VITE_API_URL || "https://leancode.onrender.com"
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
 ).replace(/\/+$/, "");
 
 const CODE_EXPLANATIONS = {
@@ -6663,7 +6657,6 @@ function App() {
   const [submissionStatus, setSubmissionStatus] = useState("");
   const [submissionHistory, setSubmissionHistory] = useState([]);
   const [allSubmissionEntries, setAllSubmissionEntries] = useState([]);
-<<<<<<< HEAD
   // Mirror of this account's saved submissions, kept in state so it can be
   // synced to the server (the real copy still lives in localStorage too).
   const [submissionsSnapshot, setSubmissionsSnapshot] = useState(() => {
@@ -6677,8 +6670,7 @@ function App() {
       return {};
     }
   });
-=======
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
+
   const [submissionFilter, setSubmissionFilter] = useState("All");
   const [submissionLanguageFilter, setSubmissionLanguageFilter] = useState("All");
   const [submissionSearch, setSubmissionSearch] = useState("");
@@ -6753,6 +6745,7 @@ const [isAssistantLoading, setIsAssistantLoading] = useState(false);
 
 const userStorageKey = currentUser?.id || currentUser?._id || "guest";
   const [loadedUserStorageKey, setLoadedUserStorageKey] = useState(null);
+  const [notePadContent, setNotePadContent] = useState("");
   const [dailyCoins, setDailyCoins] = useState(0);
   const [dailyStreak, setDailyStreak] = useState(0);
 
@@ -6772,6 +6765,8 @@ const userStorageKey = currentUser?.id || currentUser?._id || "guest";
       setCustomRoadmaps(Array.isArray(roadmaps) ? roadmaps : []);
       setCompletedModules(Array.isArray(modules) ? modules : []);
       setRoadmapLearningState(learning && typeof learning === "object" ? learning : {});
+      const savedNotes = localStorage.getItem(`codementor_notes_${userStorageKey}`) || "";
+      setNotePadContent(savedNotes);
     } catch (error) {
       console.error("Could not load user-specific learning data:", error);
       setCustomRoadmaps([]);
@@ -6814,9 +6809,14 @@ const userStorageKey = currentUser?.id || currentUser?._id || "guest";
         }
         setDailyStreak(streak);
 
-        // Award 10 coins per consecutive coding day, capped at 30 coins.
-        // Examples: 1 day = 10, 2 days = 20, 3+ days (including 30 days) = 30.
-        setDailyCoins(Math.min(streak * 10, 30));
+        // Match the Daily Challenge total: 10 points for each uniquely solved
+        // daily question. Streak is shown separately and is not a points cap.
+        const uniqueSolvedIds = new Set(
+          Object.values(completed)
+            .map((item) => item?.challengeId)
+            .filter(Boolean)
+        );
+        setDailyCoins(uniqueSolvedIds.size * 10);
       } catch {
         setDailyCoins(0);
         setDailyStreak(0);
@@ -6867,7 +6867,6 @@ const userStorageKey = currentUser?.id || currentUser?._id || "guest";
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn]);
 
-<<<<<<< HEAD
   // ------------------------------------------------------------------
   // Cross-device sync: the same account shows the same data everywhere.
   // ------------------------------------------------------------------
@@ -6875,6 +6874,32 @@ const userStorageKey = currentUser?.id || currentUser?._id || "guest";
     isLoggedIn &&
     userStorageKey !== "guest" &&
     loadedUserStorageKey === userStorageKey;
+
+  // Keep the user's notes locally and sync them to their account across browsers.
+  useEffect(() => {
+    if (loadedUserStorageKey !== userStorageKey) return;
+    try {
+      localStorage.setItem(`codementor_notes_${userStorageKey}`, notePadContent);
+    } catch (error) {
+      console.error("Could not save Note Pad content:", error);
+    }
+  }, [notePadContent, userStorageKey, loadedUserStorageKey]);
+
+  useCloudField({
+    field: "notePadContent",
+    enabled: cloudSyncEnabled,
+    userKey: userStorageKey,
+    value: notePadContent,
+    onRemote: (next) => {
+      const safe = typeof next === "string" ? next : "";
+      setNotePadContent(safe);
+      try {
+        localStorage.setItem(`codementor_notes_${userStorageKey}`, safe);
+      } catch (error) {
+        console.error("Could not store synced notes:", error);
+      }
+    },
+  });
 
   useCloudField({
     field: "customRoadmaps",
@@ -6993,8 +7018,7 @@ const userStorageKey = currentUser?.id || currentUser?._id || "guest";
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn]);
 
-=======
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
+
   async function handleAuth(event) {
     event.preventDefault();
 
@@ -7213,7 +7237,6 @@ setActivePage("Dashboard");
   // only when at least one submission was accepted; failed attempts remain attempted.
   const savedProblemSubmissions = readAllSubmissions();
   const getProblemStatus = (problem) => {
-<<<<<<< HEAD
     // Solved on any device: the server keeps one record per solved problem.
     if (
       Array.isArray(userProgress) &&
@@ -7223,8 +7246,7 @@ setActivePage("Dashboard");
     ) {
       return "solved";
     }
-=======
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
+
     const saved = savedProblemSubmissions[getProblemSubmissionId(problem)];
     const attempts = Array.isArray(saved?.history)
       ? saved.history
@@ -7573,10 +7595,8 @@ setActivePage("Dashboard");
         getSubmissionStorageKey(),
         JSON.stringify(allSubmissions)
       );
-<<<<<<< HEAD
       setSubmissionsSnapshot({ ...allSubmissions });
-=======
->>>>>>> 7df38613cfab271ca06fbd9a37f3dbf66220a2f3
+
       setSubmissionHistory(history);
       setAllSubmissionEntries(getAllSubmissionEntries());
 
@@ -7929,6 +7949,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
   { label: "AI Mentor", icon: "✧" },
   { label: "AI Assistant", icon: "🤖" },
   { label: "Learning Roadmap", icon: "↗" },
+  { label: "Note Pad", icon: "📝" },
 ];
   const moduleStatuses = roadmapModules.map((module) => getRoadmapModuleStatus(module));
   const completedCount = moduleStatuses.filter((status) => status.complete).length;
@@ -8269,7 +8290,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
       <aside
         onMouseEnter={() => setSidebarHovered(true)}
         onMouseLeave={() => setSidebarHovered(false)}
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col border-r border-slate-200 bg-white py-5 shadow-sm transition-all duration-300 ease-in-out md:translate-x-0 ${
+        className={`lc-sidebar fixed inset-y-0 left-0 z-40 flex flex-col border-r border-slate-200 bg-white py-5 shadow-sm transition-all duration-300 ease-in-out md:translate-x-0 ${
           sidebarOpen ? "translate-x-0 w-72 px-5" : "-translate-x-full w-20 px-3"
         } ${sidebarHovered ? "md:w-72 md:px-5 md:shadow-xl" : "md:w-20 md:px-3"}`}
       >
@@ -8286,10 +8307,6 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
             <span className="block text-xs text-slate-500">Learn. Practice. Grow.</span>
           </span>
         </button>
-
-        <p className={`mb-3 overflow-hidden whitespace-nowrap px-3 text-xs font-bold uppercase tracking-widest text-slate-400 transition-opacity ${sidebarHovered || sidebarOpen ? "opacity-100" : "opacity-0"}`}>
-          Main Menu
-        </p>
 
         <nav className="flex-1 space-y-1.5">
           {navItems.map((item) => {
@@ -8324,7 +8341,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
           )}
         </div>
       </aside>
-      <div className={`min-h-screen transition-[padding] duration-300 ease-in-out ${sidebarHovered ? "md:pl-72" : "md:pl-20"}`}>
+      <div className="lc-dashboard-shell min-h-screen transition-[padding] duration-300 ease-in-out">
         <header className="sticky top-0 z-20 flex h-[76px] items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur-xl sm:px-7">
           <div className="flex items-center gap-3">
             <button
@@ -8498,10 +8515,10 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
           </div>
         )}
 
-        <main className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
+        <main className="lc-dashboard-main mx-auto w-full min-w-0 max-w-[1600px] p-4 sm:p-6 lg:p-8">
           {activePage === "Dashboard" && (
             <div className="space-y-5 sm:space-y-6">
-              <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-700 via-indigo-600 to-violet-600 p-7 text-white shadow-xl shadow-indigo-600/10 sm:p-9 lg:p-10">
+              <section className="lc-dashboard-hero relative w-full min-w-0 overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-700 via-indigo-600 to-violet-600 p-6 text-white shadow-xl shadow-indigo-600/10 sm:p-8 lg:p-10">
                 <div className="absolute -right-10 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
 
                 <div className="relative z-10 max-w-3xl">
@@ -8509,7 +8526,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                     YOUR PERSONAL CODING ASSISTANT
                   </span>
 
-                  <h2 className="mt-4 max-w-4xl text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
+                  <h2 className="lc-dashboard-hero-title mt-4 max-w-4xl font-black leading-tight">
                     Build skills. Solve problems.
                     <br />Become a developer.
                   </h2>
@@ -9723,6 +9740,50 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
               <BeginnerZone />
             </section>
           )}
+          {activePage === "Note Pad" && (
+            <section className="mx-auto max-w-5xl space-y-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900">My Note Pad</h2>
+                  <p className="mt-2 text-sm text-slate-500">
+                    Write down your ideas, study notes, code snippets, and reminders. Your notes save automatically.
+                  </p>
+                </div>
+                <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" /> Auto-save enabled
+                </span>
+              </div>
+
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3">
+                  <div>
+                    <p className="font-semibold text-slate-800">Personal Notes</p>
+                    <p className="mt-0.5 text-xs text-slate-400">Private to your account</p>
+                  </div>
+                  <span className="text-xs text-slate-400">{notePadContent.length.toLocaleString()} characters</span>
+                </div>
+                <textarea
+                  value={notePadContent}
+                  onChange={(event) => setNotePadContent(event.target.value)}
+                  placeholder="Start writing your notes here...&#10;&#10;You can save:&#10;• Important concepts&#10;• Interview questions&#10;• Code snippets&#10;• Daily learning goals"
+                  aria-label="Personal note pad"
+                  spellCheck="true"
+                  className="min-h-[60vh] w-full resize-y border-0 bg-white px-5 py-5 text-sm leading-7 text-slate-800 outline-none placeholder:text-slate-400 focus:ring-0"
+                />
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-slate-50 px-5 py-3 text-xs text-slate-500">
+                  <span>Notes are saved automatically as you type.</span>
+                  <button
+                    type="button"
+                    onClick={() => setNotePadContent("")}
+                    className="rounded-lg px-3 py-2 font-semibold text-red-600 transition hover:bg-red-50"
+                  >
+                    Clear notes
+                  </button>
+                </div>
+              </div>
+            </section>
+          )}
+
           {activePage === "AI Assistant" && (
   <AiAssistantPage
     onNavigate={(page) => setActivePage(page)}

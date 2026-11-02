@@ -29,6 +29,9 @@ function same(a, b) {
 
 function isEmptyValue(value) {
   if (value == null) return true;
+  // An empty Note Pad string must count as empty so a fresh browser
+  // can load the saved note from the server instead of keeping "".
+  if (typeof value === "string") return value.trim().length === 0;
   if (Array.isArray(value)) return value.length === 0;
   if (typeof value === "object") return Object.keys(value).length === 0;
   return false;
@@ -197,6 +200,7 @@ export function useCloudField({
   const mergeRef = useRef(merge);
   const stateRef = useRef({ ready: false, version: 0, synced: "null" });
   const timerRef = useRef(null);
+  const loadRetryRef = useRef(null);
   const pushingRef = useRef(false);
 
   valueRef.current = value;
@@ -222,7 +226,15 @@ export function useCloudField({
           timeout: 20000,
         });
 
-        if (cancelled || !response.data?.success) return;
+        if (cancelled) return;
+        if (!response.data?.success) {
+          throw new Error(response.data?.message || "Learning data load was not successful.");
+        }
+
+        if (loadRetryRef.current) {
+          clearTimeout(loadRetryRef.current);
+          loadRetryRef.current = null;
+        }
 
         const serverValue = response.data.data?.[field];
         const version = response.data.versions?.[field] || 0;
@@ -244,8 +256,14 @@ export function useCloudField({
           schedulePush();
         }
       } catch (error) {
-        // Stay offline-friendly: local data keeps working.
+        // Stay offline-friendly, but retry the first server read. Without this,
+        // one temporary Render/network failure leaves state.ready=false forever,
+        // so later edits are never uploaded during this login session.
         console.error(`Cloud sync load failed (${field}):`, error.response?.data || error.message);
+        if (!cancelled) {
+          if (loadRetryRef.current) clearTimeout(loadRetryRef.current);
+          loadRetryRef.current = setTimeout(initialLoad, 5000);
+        }
       }
     }
 
@@ -254,6 +272,7 @@ export function useCloudField({
     return () => {
       cancelled = true;
       if (timerRef.current) clearTimeout(timerRef.current);
+      if (loadRetryRef.current) clearTimeout(loadRetryRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, userKey, field]);
@@ -278,6 +297,10 @@ export function useCloudField({
         { [field]: current, baseVersions: { [field]: state.version } },
         { headers: authHeaders(token), timeout: 20000 }
       );
+
+      if (!response.data?.success) {
+        throw new Error(response.data?.message || "Learning data save was not successful.");
+      }
 
       const conflict = response.data?.conflicts?.[field];
 
