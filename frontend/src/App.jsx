@@ -18,6 +18,8 @@ import {
 } from "recharts";
 import BeginnerZone from "./BeginnerZone";
 import DailyChallenge from "./DailyChallenge";
+import AdminDashboard from "./components/AdminDashboard.jsx";
+import AdminManagement from "./components/AdminManagement.jsx";
 import {
   useCloudField,
   mergeById,
@@ -6575,7 +6577,15 @@ function handleEditorMount(editor, monaco) {
 }
 
 function App() {
-  const [activePage, setActivePageState] = useState("Dashboard");
+  const getRoleHomePage = () => {
+    try {
+      const role = JSON.parse(localStorage.getItem("user") || "null")?.role || "student";
+      return role === "superadmin" ? "Admin Dashboard" : "Dashboard";
+    } catch {
+      return "Dashboard";
+    }
+  };
+  const [activePage, setActivePageState] = useState(getRoleHomePage);
 
   // Keep the app's internal pages in browser history so Back returns
   // to the previous CodeMentor page instead of leaving the site.
@@ -6595,7 +6605,7 @@ function App() {
   useEffect(() => {
     const initialState = {
       ...(window.history.state || {}),
-      codeMentorPage: "Dashboard",
+      codeMentorPage: getRoleHomePage(),
     };
 
     // Replace the current entry and add an in-app base entry.
@@ -6610,7 +6620,7 @@ function App() {
       if (event.state?.codeMentorPage) {
         setActivePageState(event.state.codeMentorPage);
       } else {
-        setActivePageState("Dashboard");
+        setActivePageState(getRoleHomePage());
       }
     };
 
@@ -6635,6 +6645,7 @@ function App() {
   const [authName, setAuthName] = useState("");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
+  const [showAuthPassword, setShowAuthPassword] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const [authMessage, setAuthMessage] = useState("");
   const [authError, setAuthError] = useState("");
@@ -7155,7 +7166,7 @@ const userStorageKey = currentUser?.id || currentUser?._id || "guest";
         // load this account's own roadmaps and completed modules.
         setIsLoggedIn(true);
 setShowAuth(false);
-setActivePage("Dashboard");
+setActivePage(user.role === "superadmin" ? "Admin Dashboard" : "Dashboard");
 
         setAuthName("");
         setAuthEmail("");
@@ -7942,7 +7953,15 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
   const solvedTopicQuestions = topicProgressData.reduce((sum, item) => sum + item.solved, 0);
   const overallTopicPercent = totalTopicQuestions ? Math.round((solvedTopicQuestions / totalTopicQuestions) * 100) : 0;
 
-  const navItems = [
+ const currentUserRole = (() => {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null")?.role || "student";
+  } catch {
+    return "student";
+  }
+})();
+
+const learningNavItems = [
   { label: "Dashboard", icon: "⌂" },
   { label: "Beginner Zone", icon: "◈" },
   { label: "Coding Practice", icon: "⌘" },
@@ -7951,6 +7970,19 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
   { label: "Learning Roadmap", icon: "↗" },
   { label: "Note Pad", icon: "📝" },
 ];
+
+const navItems =
+  currentUserRole === "superadmin"
+    ? [
+        { label: "Admin Dashboard", icon: "🛡️" },
+        { label: "Admin Management", icon: "⚙️" },
+      ]
+    : currentUserRole === "admin"
+    ? [
+        ...learningNavItems,
+        { label: "Admin Dashboard", icon: "🛡️" },
+      ]
+    : learningNavItems;
   const moduleStatuses = roadmapModules.map((module) => getRoadmapModuleStatus(module));
   const completedCount = moduleStatuses.filter((status) => status.complete).length;
   const automaticCompletedTitles = roadmapModules
@@ -8164,17 +8196,28 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                       Password
                     </label>
 
-                    <input
-                      type="password"
-                      className={inputClass}
-                      placeholder="At least 8 characters"
-                      value={authPassword}
-                      onChange={(event) =>
-                        setAuthPassword(event.target.value)
-                      }
-                      minLength={8}
-                      required
-                    />
+                    <div className="relative">
+                      <input
+                        type={showAuthPassword ? "text" : "password"}
+                        className={`${inputClass} pr-24`}
+                        placeholder="At least 8 characters"
+                        value={authPassword}
+                        onChange={(event) =>
+                          setAuthPassword(event.target.value)
+                        }
+                        minLength={8}
+                        autoComplete={authPage === "signup" ? "new-password" : "current-password"}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowAuthPassword((visible) => !visible)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md px-2 py-1 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 hover:text-indigo-800"
+                        aria-label={showAuthPassword ? "Hide password" : "Show password"}
+                      >
+                        {showAuthPassword ? "Hide Password" : "Show Password"}
+                      </button>
+                    </div>
                     {authPage === "login" && (
                       <div className="mt-2 text-right">
                         <button
@@ -8328,7 +8371,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
             );
           })}
         </nav>
-
+          {currentUserRole !== "superadmin" && (
         <div className={`mt-6 mb-4 shrink-0 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-600/15 transition-all duration-200 ${sidebarHovered || sidebarOpen ? "p-4" : "p-2"}`}>
           {sidebarHovered || sidebarOpen ? (
             <>
@@ -8340,7 +8383,9 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
             <button onClick={() => openPage("Coding Practice")} title="Practice Now" className="flex h-10 w-full items-center justify-center text-lg">🚀</button>
           )}
         </div>
+        )}
       </aside>
+      
       <div className="lc-dashboard-shell min-h-screen transition-[padding] duration-300 ease-in-out">
         <header className="sticky top-0 z-20 flex h-[76px] items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur-xl sm:px-7">
           <div className="flex items-center gap-3">
@@ -8364,6 +8409,8 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            {currentUserRole !== "superadmin" && (
+              <>
             <div
               title="Total coins earned from Daily Challenges"
               className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-2"
@@ -8385,6 +8432,8 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                 {dailyStreak}
               </span>
             </div>
+              </>
+            )}
 
             <div className="relative">
               <button
@@ -8419,16 +8468,18 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                     <span aria-hidden="true">👤</span> Profile
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowUserMenu(false);
-                      setActivePage("My Progress");
-                    }}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-700"
-                  >
-                    <span aria-hidden="true">▥</span> My Progress
-                  </button>
+                  {currentUserRole !== "superadmin" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        setActivePage("My Progress");
+                      }}
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-700"
+                    >
+                      <span aria-hidden="true">▥</span> My Progress
+                    </button>
+                  )}
 
                   <button
                     type="button"
@@ -8480,10 +8531,11 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                 <div className="min-w-0">
                   <p className="truncate font-semibold text-slate-900">{userName}</p>
                   <p className="truncate text-sm text-slate-600">{savedUser?.email || "Email not available"}</p>
-                  <p className="mt-1 text-xs text-indigo-700">Learn Code Student</p>
+                  <p className="mt-1 text-xs text-indigo-700">{currentUserRole === "superadmin" ? "Super Admin" : currentUserRole === "admin" ? "Admin" : "Learn Code Student"}</p>
                 </div>
               </div>
 
+              {currentUserRole !== "superadmin" && (
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
                   <p className="text-xs text-amber-700">Total coins</p>
@@ -8494,6 +8546,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                   <p className="mt-1 text-xl font-extrabold text-orange-800">🔥 {dailyStreak}</p>
                 </div>
               </div>
+              )}
 
               <div className="mt-6 flex justify-end gap-3">
                 <button
@@ -8516,8 +8569,8 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
         )}
 
         <main className="lc-dashboard-main mx-auto w-full min-w-0 max-w-[1600px] p-4 sm:p-6 lg:p-8">
-          {activePage === "Dashboard" && (
-            <div className="space-y-5 sm:space-y-6">
+          {activePage === "Dashboard" && currentUserRole !== "superadmin" && (
+            <div className="lc-dashboard-sections space-y-3">
               <section className="lc-dashboard-hero relative w-full min-w-0 overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-700 via-indigo-600 to-violet-600 p-6 text-white shadow-xl shadow-indigo-600/10 sm:p-8 lg:p-10">
                 <div className="absolute -right-10 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
 
@@ -8562,7 +8615,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
               <button
                 type="button"
                 onClick={() => openPage("Daily Challenge")}
-                className="group flex w-full items-center justify-between gap-4 rounded-2xl border border-orange-200 bg-gradient-to-r from-orange-50 via-amber-50 to-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-lg sm:p-6"
+                className="group flex w-full items-center justify-between gap-3 rounded-2xl border border-orange-200 bg-gradient-to-r from-orange-50 via-amber-50 to-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-lg sm:p-5"
               >
                 <span className="flex min-w-0 items-center gap-4">
                   <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-2xl shadow-inner">🔥</span>
@@ -8574,7 +8627,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                 <span className="shrink-0 rounded-xl bg-orange-500 px-5 py-3 text-base font-bold !text-white transition group-hover:bg-orange-600">Open →</span>
               </button>
 
-              <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {[
                   {
                     label: "Problems Solved",
@@ -8608,7 +8661,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                 ].map((item) => (
                   <div
                     key={item.label}
-                    className={`${cardClass} min-w-0 p-5 sm:p-6`}
+                    className={`${cardClass} min-w-0 p-4`}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-base font-semibold text-slate-600">
@@ -8622,7 +8675,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                       </span>
                     </div>
 
-                    <p className="mt-4 text-4xl font-black tracking-tight text-slate-900">
+                    <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">
                       {item.value}
                     </p>
 
@@ -8633,7 +8686,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                 ))}
               </section>
 
-              <section className="grid items-start gap-5 2xl:grid-cols-3">
+              <section className="grid items-start gap-3 2xl:grid-cols-3">
                 <div className={`${cardClass} min-w-0 xl:col-span-2`}>
                   <div className="flex items-center justify-between gap-3">
                     <div>
@@ -8641,7 +8694,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                         Continue Learning
                       </h3>
 
-                      <p className="mt-1 text-base text-slate-500">
+                      <p className="mt-1 text-sm text-slate-500">
                         Pick up where you left off.
                       </p>
                     </div>
@@ -8654,7 +8707,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                     </button>
                   </div>
 
-                  <div className="mt-6 space-y-6">
+                  <div className="mt-4 space-y-4">
                     {roadmapModules.slice(0, 3).map((module) => {
                       const progress = getRoadmapModuleStatus(module).progress;
 
@@ -8693,11 +8746,11 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                     Quick Actions
                   </h3>
 
-                  <p className="mt-1 text-base text-slate-500">
+                  <p className="mt-1 text-sm text-slate-500">
                     What would you like to do today?
                   </p>
 
-                  <div className="mt-5 space-y-3">
+                  <div className="mt-4 space-y-2">
                     {[
                       {
                         title: "Solve a Problem",
@@ -8721,9 +8774,9 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                       <button
                         key={action.title}
                         onClick={() => openPage(action.page)}
-                        className="flex w-full items-center gap-3 rounded-xl border border-slate-100 p-4 text-left transition hover:border-indigo-200 hover:bg-indigo-50/50"
+                        className="flex w-full items-center gap-3 rounded-xl border border-slate-100 p-3 text-left transition hover:border-indigo-200 hover:bg-indigo-50/50"
                       >
-                        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-lg font-bold text-indigo-600">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-lg font-bold text-indigo-600">
                           {action.icon}
                         </span>
 
@@ -8770,7 +8823,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
           )}
 
           {activePage === "Coding Practice" && (
-            <section className="space-y-5">
+            <section className="space-y-3">
               <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                 <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 px-6 py-6 text-white sm:px-8">
                   <div className="flex flex-wrap items-start justify-between gap-4">
@@ -8925,31 +8978,30 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                   </div>
 
                   {selectedProblem ? (
-                    <div className="max-h-[70vh] space-y-6 overflow-y-auto p-5 text-sm leading-7 text-slate-700">
-                      {(() => {
+                    <div className="tp-problem-content max-h-[70vh] space-y-3 overflow-y-auto p-4 text-sm leading-6 text-slate-700">  {(() => {
                         const needsGuide = selectedProblem.inputFormat === "__NEEDS_LEARNING_GUIDE__" || selectedProblem.description.startsWith("Practice ");
                         const guide = getProblemLearningGuide(selectedProblem);
                         return (
                           <>
                             <section>
-                              <h3 className="mb-2 text-base font-bold text-slate-900">Problem Description — Easy Explanation</h3>
+                              <h3 className="mb-1 text-base font-bold text-slate-900">Problem Description — Easy Explanation</h3>
                               <p className="whitespace-pre-line">{needsGuide ? guide.summary : selectedProblem.description}</p>
                             </section>
-                            <section className="rounded-lg border border-indigo-100 bg-indigo-50/70 p-4">
-                              <h3 className="mb-2 text-base font-bold text-slate-900">What do you need to do?</h3>
+                            <section className="rounded-lg border border-indigo-100 bg-indigo-50/70 p-3">
+                              <h3 className="mb-1 text-base font-bold text-slate-900">What do you need to do?</h3>
                               <p>{needsGuide ? guide.goal : "Read the input carefully and return the result requested in the problem statement."}</p>
                             </section>
                             <section>
-                              <h3 className="mb-2 text-base font-bold text-slate-900">How to think about it</h3>
+                              <h3 className="mb-1 text-base font-bold text-slate-900">How to think about it</h3>
                               <p>{guide.approach}</p>
                             </section>
                             <section>
-                              <h3 className="mb-2 text-base font-bold text-slate-900">Edge cases to consider</h3>
+                              <h3 className="mb-1 text-base font-bold text-slate-900">Edge cases to consider</h3>
                               <p>{guide.edgeCases}</p>
                             </section>
                             {selectedProblem.inputFormat && !needsGuide && (
                               <section>
-                                <h3 className="mb-2 text-base font-bold text-slate-900">Input Format</h3>
+                                <h3 className="mb-1 text-base font-bold text-slate-900">Input Format</h3>
                                 <div className="rounded-lg border border-indigo-100 bg-indigo-50/70 p-3 text-slate-700">{selectedProblem.inputFormat}</div>
                               </section>
                             )}
@@ -8963,7 +9015,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                       })()}
 
                       {!((selectedProblem.inputFormat === "__NEEDS_LEARNING_GUIDE__") || selectedProblem.description.startsWith("Practice ")) && <section>
-                        <h3 className="mb-2 text-base font-bold text-slate-900">Example</h3>
+                        <h3 className="mb-1 text-base font-bold text-slate-900">Example</h3>
                         <div className="overflow-hidden rounded-lg border border-slate-200">
                           <div className="border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold uppercase tracking-wide text-slate-500">Input</div>
                           <pre className="whitespace-pre-wrap break-words bg-white p-3 font-mono text-sm text-slate-800">{selectedProblem.example || "No example provided."}</pre>
@@ -8974,7 +9026,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
 
                       {selectedProblem.testCases?.length > 0 && (
                         <section>
-                          <h3 className="mb-2 text-base font-bold text-slate-900">Practice Test Cases</h3>
+                          <h3 className="mb-1 text-base font-bold text-slate-900">Practice Test Cases</h3>
                           <div className="space-y-3">
                             {selectedProblem.testCases.slice(0, 3).map((testCase, index) => (
                               <div key={`${selectedProblem.id}-statement-test-${index}`} className="rounded-lg border border-slate-200 bg-slate-50/70 p-3">
@@ -9445,7 +9497,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
             </section>
           )}
 
-          {activePage === "My Progress" && (() => {
+          {activePage === "My Progress" && currentUserRole !== "superadmin" && (() => {
             const locallySolvedProblems = problems.filter((problem) => getProblemStatus(problem) === "solved");
             const difficultyData = ["Easy", "Medium", "Hard"].map((difficulty) => ({
               difficulty,
@@ -9534,7 +9586,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                       No accepted submissions yet. Solve a problem in Coding Practice to see your progress here.
                     </p>
                   ) : (
-                    <div className="mt-5 space-y-3">
+                    <div className="mt-4 space-y-2">
                       {locallySolvedProblems.map((problem) => {
                         const saved = savedProblemSubmissions[getProblemSubmissionId(problem)];
                         const attempts = Array.isArray(saved?.history) ? saved.history : saved?.latest ? [saved.latest] : [];
@@ -9688,7 +9740,7 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
                 </form>
 
                 {customRoadmaps.length > 0 && (
-                  <div className="mt-5 space-y-3">
+                  <div className="mt-4 space-y-2">
                     {customRoadmaps.map((roadmap) => (
                       <div
                         key={roadmap.id}
@@ -9739,6 +9791,12 @@ Problem: ${selectedProblem?.title || "General code review"}. Use the supplied pr
 
               <BeginnerZone />
             </section>
+          )}
+          {activePage === "Admin Dashboard" && (
+            <AdminDashboard />
+          )}
+          {activePage === "Admin Management" && (
+            <AdminManagement />
           )}
           {activePage === "Note Pad" && (
             <section className="mx-auto max-w-5xl space-y-5">

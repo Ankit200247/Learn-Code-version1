@@ -316,8 +316,8 @@ const response = await axios.post(`${API_BASE_URL}/api/run`, {
                 </div>
               );
             })}
-          </div>
-          <div className="daily-calendar-footer">
+            </div>
+            <div className="daily-calendar-footer">
             <span>🔥 Current streak</span>
             <strong>{streakStats.current} {streakStats.current === 1 ? "day" : "days"}</strong>
             <span className="daily-calendar-total">{streakStats.solvedDates.size} days completed</span>

@@ -2774,3 +2774,72 @@ body,
   .lc-dashboard-hero > .relative.z-10 { padding-left: 0; }
   .lc-dashboard-hero-title { font-size: clamp(1.75rem, 7vw, 2.35rem) !important; line-height: 1.14 !important; }
 }
+
+
+/* ==========================================================
+   COMPACT VERTICAL SPACING — Dashboard + Coding Practice
+   Scoped to the two content areas so other pages are untouched.
+   ========================================================== */
+
+.lc-dashboard-sections {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.lc-dashboard-sections > * {
+  margin-block: 0 !important;
+}
+
+.lc-dashboard-sections .space-y-4 > * + * {
+  margin-top: 10px !important;
+}
+
+.tp-problem-content {
+  /* Use normal grid flow: flex items were shrinking and colliding
+     inside the max-height scrolling panel. */
+  display: grid !important;
+  grid-auto-rows: max-content !important;
+  align-content: start !important;
+  gap: 12px !important;
+  line-height: 1.5 !important;
+}
+
+.tp-problem-content > * {
+  margin-block: 0 !important;
+}
+.tp-problem-content > * + * {
+  margin-top: 0 !important;
+}
+
+.tp-problem-content section {
+  display: block !important;
+  min-height: max-content !important;
+  height: auto !important;
+  flex: none !important;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.tp-problem-content p {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  line-height: 1.5 !important;
+}
+
+.tp-problem-content h3 {
+  margin-top: 0 !important;
+  margin-bottom: 4px !important;
+  line-height: 1.35 !important;
+}
+
+.tp-problem-content pre {
+  margin-block: 0 !important;
+}
+
+@media (max-width: 767px) {
+  .lc-dashboard-sections,
+  .tp-problem-content {
+    gap: 10px !important;
+  }
+}

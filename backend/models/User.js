@@ -32,6 +32,19 @@ emailVerified: {
   default: false,
 },
 
+  // USER ROLE AND ACTIVITY
+  role: {
+    type: String,
+    enum: ["student", "admin", "superadmin"],
+    default: "student",
+    lowercase: true,
+    trim: true,
+  },
+  lastActiveAt: {
+    type: Date,
+    default: null,
+  },
+  
 // POINTS SYSTEM
 totalPoints: {
   type: Number,

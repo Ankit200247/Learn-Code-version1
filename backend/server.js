@@ -278,6 +278,45 @@ function requireAuth(req, res, next) {
 }
 
 // --------------------------------------------------
+// ADMIN ROLE AUTHORIZATION
+// --------------------------------------------------
+
+function requireRole(allowedRoles) {
+  return async (req, res, next) => {
+    try {
+      const user = await User.findById(req.userId).select("role");
+
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: "User account not found.",
+        });
+      }
+
+      if (!allowedRoles.includes(user.role)) {
+        return res.status(403).json({
+          success: false,
+          message: "You do not have permission to access this section.",
+        });
+      }
+
+      req.userRole = user.role;
+      return next();
+    } catch (error) {
+      console.error("Role authorization error:", error.message);
+
+      return res.status(500).json({
+        success: false,
+        message: "Unable to verify user permissions.",
+      });
+    }
+  };
+}
+
+const requireAdmin = requireRole(["admin", "superadmin"]);
+const requireSuperAdmin = requireRole(["superadmin"]);
+
+// --------------------------------------------------
 // COMMON HELPERS
 // --------------------------------------------------
 
@@ -402,11 +441,12 @@ app.post("/api/auth/register", async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 12);
 
     const user = await User.create({
-      name,
-      email,
-      passwordHash,
-      emailVerified: false,
-    });
+  name,
+  email,
+  passwordHash,
+  emailVerified: false,
+  lastActiveAt: new Date(),
+});
 
     const token = jwt.sign(
       {
@@ -422,10 +462,11 @@ app.post("/api/auth/register", async (req, res) => {
       message: "Account created successfully.",
       token,
       user: {
-        id: user._id.toString(),
-        name: user.name,
-        email: user.email,
-      },
+  id: user._id.toString(),
+  name: user.name,
+  email: user.email,
+  role: user.role || "student",
+},
     });
   } catch (error) {
     console.error("Registration error:", error.message);
@@ -494,6 +535,10 @@ app.post("/api/auth/login", async (req, res) => {
       });
     }
 
+        // Update user's last login activity
+    user.lastActiveAt = new Date();
+    await user.save();
+
     const token = jwt.sign(
       {
         sub: user._id.toString(),
@@ -511,6 +556,7 @@ app.post("/api/auth/login", async (req, res) => {
         id: user._id.toString(),
         name: user.name || "",
         email: user.email,
+        role: user.role || "student",
       },
     });
   } catch (error) {
@@ -763,8 +809,8 @@ app.get("/api/auth/me", requireAuth, async (req, res) => {
     if (!databaseReady(res)) return;
 
     const user = await User.findById(req.userId).select(
-      "email name emailVerified createdAt"
-    );
+  "email name emailVerified createdAt role lastActiveAt"
+);
 
     if (!user) {
       return res.status(404).json({
@@ -782,6 +828,8 @@ app.get("/api/auth/me", requireAuth, async (req, res) => {
         name: user.name || "",
         emailVerified: user.emailVerified,
         createdAt: user.createdAt,
+        role: user.role || "student",
+        lastActiveAt: user.lastActiveAt,
       },
     });
   } catch (error) {
@@ -1006,6 +1054,348 @@ app.get("/api/progress", requireAuth, async (req, res) => {
     });
   }
 });
+
+// --------------------------------------------------
+// ADMIN DASHBOARD OVERVIEW
+// --------------------------------------------------
+
+app.get("/api/admin/overview", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    if (!databaseReady(res)) return;
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const studentFilter = {
+  $or: [
+    { role: "student" },
+    { role: { $exists: false } },
+  ],
+};
+
+const totalStudents = await User.countDocuments(studentFilter);
+
+    const activeStudents = await User.countDocuments({
+  $and: [
+    studentFilter,
+    { lastActiveAt: { $gte: sevenDaysAgo } },
+  ],
+});
+
+    const inactiveStudents = totalStudents - activeStudents;
+
+    const studentIds = await User.distinct("_id", studentFilter);
+
+    const totalSolvedQuestions = await Progress.countDocuments({
+      user: { $in: studentIds },
+    });
+
+    return res.json({
+      success: true,
+      overview: {
+        totalStudents,
+        activeStudents,
+        inactiveStudents,
+        totalSolvedQuestions,
+      },
+    });
+  } catch (error) {
+    console.error("Admin overview error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch admin dashboard overview.",
+    });
+  }
+});
+
+// --------------------------------------------------
+// ADMIN STUDENTS LIST
+// --------------------------------------------------
+
+app.get("/api/admin/students", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    if (!databaseReady(res)) return;
+    const studentFilter = {
+  $or: [
+    { role: "student" },
+    { role: { $exists: false } },
+  ],
+};
+
+   const students = await User.find(studentFilter)
+      .select("name email createdAt lastActiveAt")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const studentIds = students.map((student) => student._id);
+
+    const progressData = await Progress.aggregate([
+      {
+        $match: {
+          user: { $in: studentIds },
+        },
+      },
+      {
+        $group: {
+          _id: "$user",
+          solvedCount: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const learningData = await LearningData.find({
+      user: { $in: studentIds },
+    })
+      .select("user completedModules")
+      .lean();
+
+    const progressMap = new Map(
+      progressData.map((item) => [
+        item._id.toString(),
+        item.solvedCount,
+      ])
+    );
+
+    const learningMap = new Map(
+      learningData.map((item) => [
+        item.user.toString(),
+        item.completedModules,
+      ])
+    );
+
+    const studentList = students.map((student) => {
+      const completedModules = learningMap.get(student._id.toString());
+
+      const completedModulesCount = Array.isArray(completedModules)
+        ? completedModules.length
+        : completedModules && typeof completedModules === "object"
+          ? Object.keys(completedModules).length
+          : 0;
+
+      return {
+        id: student._id.toString(),
+        name: student.name || "Student",
+        email: student.email,
+        registeredAt: student.createdAt,
+        lastActiveAt: student.lastActiveAt || null,
+        totalProblemsSolved:
+          progressMap.get(student._id.toString()) || 0,
+        completedModules: completedModulesCount,
+      };
+    });
+
+    return res.json({
+      success: true,
+      totalStudents: studentList.length,
+      students: studentList,
+    });
+  } catch (error) {
+    console.error("Admin students list error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch students list.",
+    });
+  }
+});
+
+// --------------------------------------------------
+// SUPER ADMIN - MANAGE ADMIN ROLES
+// --------------------------------------------------
+
+// Get Admin and Super Admin list
+app.get(
+  "/api/admin/management/users",
+  requireAuth,
+  requireSuperAdmin,
+  async (req, res) => {
+    try {
+      if (!databaseReady(res)) return;
+
+      const users = await User.find({
+        role: { $in: ["admin", "superadmin"] },
+      })
+        .select("name email role createdAt")
+        .sort({ createdAt: -1 })
+        .lean();
+
+      return res.json({
+        success: true,
+        users,
+      });
+    } catch (error) {
+      console.error("Admin management list error:", error.message);
+
+      return res.status(500).json({
+        success: false,
+        message: "Unable to fetch admin users.",
+      });
+    }
+  }
+);
+
+
+// Promote Student to Admin OR demote Admin to Student
+app.patch(
+  "/api/admin/management/users/:id/role",
+  requireAuth,
+  requireSuperAdmin,
+  async (req, res) => {
+    try {
+      if (!databaseReady(res)) return;
+
+      const { id } = req.params;
+      const { role } = req.body;
+
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid user ID.",
+        });
+      }
+
+      if (!["student", "admin"].includes(role)) {
+        return res.status(400).json({
+          success: false,
+          message: "Only student or admin role can be assigned.",
+        });
+      }
+
+      const targetUser = await User.findById(id);
+
+      if (!targetUser) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found.",
+        });
+      }
+
+      if (targetUser.role === "superadmin") {
+        return res.status(403).json({
+          success: false,
+          message: "Super Admin role cannot be changed here.",
+        });
+      }
+
+      targetUser.role = role;
+      await targetUser.save();
+
+      return res.json({
+        success: true,
+        message: `User role updated to ${role}.`,
+        user: {
+          id: targetUser._id,
+          name: targetUser.name,
+          email: targetUser.email,
+          role: targetUser.role,
+        },
+      });
+    } catch (error) {
+      console.error("Admin role update error:", error.message);
+
+      return res.status(500).json({
+        success: false,
+        message: "Unable to update user role.",
+      });
+    }
+  }
+);
+
+// --------------------------------------------------
+// SUPER ADMIN TRANSFER
+// --------------------------------------------------
+
+app.patch(
+  "/api/admin/management/transfer-superadmin",
+  requireAuth,
+  requireSuperAdmin,
+  async (req, res) => {
+    let session;
+
+    try {
+      if (!databaseReady(res)) return;
+
+      const { newSuperAdminId } = req.body;
+
+      if (!mongoose.Types.ObjectId.isValid(newSuperAdminId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid user ID.",
+        });
+      }
+
+      if (newSuperAdminId === req.userId.toString()) {
+        return res.status(400).json({
+          success: false,
+          message: "You are already the Super Admin.",
+        });
+      }
+
+      const targetAdmin = await User.findOne({
+        _id: newSuperAdminId,
+        role: "admin",
+      }).lean();
+
+      if (!targetAdmin) {
+        return res.status(404).json({
+          success: false,
+          message: "Target user must be an existing Admin.",
+        });
+      }
+
+      session = await mongoose.startSession();
+
+      await session.withTransaction(async () => {
+        const oldSuperAdmin = await User.updateOne(
+          {
+            _id: req.userId,
+            role: "superadmin",
+          },
+          {
+            $set: { role: "admin" },
+          },
+          { session }
+        );
+
+        if (oldSuperAdmin.modifiedCount !== 1) {
+          throw new Error("Current Super Admin verification failed.");
+        }
+
+        const newSuperAdmin = await User.updateOne(
+          {
+            _id: newSuperAdminId,
+            role: "admin",
+          },
+          {
+            $set: { role: "superadmin" },
+          },
+          { session }
+        );
+
+        if (newSuperAdmin.modifiedCount !== 1) {
+          throw new Error("New Super Admin update failed.");
+        }
+      });
+
+      return res.json({
+        success: true,
+        message: "Super Admin transferred successfully.",
+      });
+    } catch (error) {
+      console.error("Super Admin transfer error:", error.message);
+
+      return res.status(500).json({
+        success: false,
+        message: "Unable to transfer Super Admin role.",
+      });
+    } finally {
+      if (session) {
+        await session.endSession();
+      }
+    }
+  }
+);
 
 // --------------------------------------------------
 // SAVE SOLVED PROBLEM
@@ -2009,6 +2399,53 @@ app.use(
 );
 
 // --------------------------------------------------
+// INITIAL SUPER ADMIN SETUP
+// --------------------------------------------------
+
+async function setupInitialSuperAdmin() {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      console.warn("Super Admin setup skipped: MongoDB is not connected.");
+      return;
+    }
+
+    const superAdminEmail = String(
+      process.env.SUPER_ADMIN_EMAIL || ""
+    ).trim().toLowerCase();
+
+    if (!superAdminEmail) {
+      console.warn("SUPER_ADMIN_EMAIL is not configured.");
+      return;
+    }
+
+    const existingSuperAdmin = await User.findOne({
+      role: "superadmin",
+    });
+
+    if (existingSuperAdmin) {
+      console.log("Super Admin already exists. No role changes made.");
+      return;
+    }
+
+    const user = await User.findOne({
+      email: superAdminEmail,
+    });
+
+    if (!user) {
+      console.warn("Configured Super Admin account was not found.");
+      return;
+    }
+
+    user.role = "superadmin";
+    await user.save();
+
+    console.log("Initial Super Admin configured successfully.");
+  } catch (error) {
+    console.error("Super Admin setup error:", error.message);
+  }
+}
+
+// --------------------------------------------------
 // START SERVER
 // --------------------------------------------------
 
@@ -2016,6 +2453,7 @@ async function startServer() {
   // Try MongoDB connection before starting.
   // The API server can still run if MongoDB is offline.
   await connectMongoDB();
+  await setupInitialSuperAdmin();
 
   const httpServer = app.listen(PORT, "0.0.0.0", () => {
     console.log(
