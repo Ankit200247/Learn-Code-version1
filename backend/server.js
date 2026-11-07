@@ -856,6 +856,7 @@ const LEARNING_FIELDS = {
   submissions: {},
   aiAssistantChats: [],
   aiMentorChats: [],
+  savedCodeFiles: [],
 };
 
 app.get("/api/learning-data", requireAuth, async (req, res) => {

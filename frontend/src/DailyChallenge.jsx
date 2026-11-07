@@ -234,10 +234,6 @@ export default function DailyChallenge() {
   ];
 
   async function runDailyChallenge() {
-    if (challengeLanguage !== "java") {
-      setChallengeOutput(`Your ${LANGUAGES.find((l) => l.id === challengeLanguage)?.name} solution is ready to edit. The current server runner executes Java only, so this language must be enabled in the backend before it can run.`);
-      return;
-    }
     setChallengeRunning(true); setChallengeOutput("Running your solution…");
     try {
       const API_BASE_URL = (
@@ -324,7 +320,7 @@ const response = await axios.post(`${API_BASE_URL}/api/run`, {
           </div>
         </div><article className="bz-streak-info-card"><span className="bz-streak-fire">🔥</span><h3>Keep your streak alive</h3><p>Solve today's problem to count this day. Miss a day and the current streak resets.</p><div className="bz-streak-rule"><span>Days 1–10</span><strong>Easy</strong></div><div className="bz-streak-rule"><span>Days 11–20</span><strong>Medium</strong></div><div className="bz-streak-rule"><span>Days 21+</span><strong>Hard</strong></div></article><article className="bz-streak-info-card bz-streak-history"><h3>Recent solved days</h3>{Object.entries(challengeCompleted).filter(([key]) => /^\d{4}-\d{2}-\d{2}$/.test(key)).sort(([a],[b]) => b.localeCompare(a)).slice(0,5).map(([date, record]) => <div className="bz-history-row" key={date}><span><strong>{record.title || "Daily challenge"}</strong><small>{date}</small></span><b>+10</b></div>)}{!Object.keys(challengeCompleted).some((key) => /^\d{4}-\d{2}-\d{2}$/.test(key)) && <p className="bz-history-empty">Your solved challenges will appear here.</p>}</article></aside>
         </div>
-        <p className="bz-daily-runtime-note">The challenge changes automatically by date. The current backend runs Java only; other languages can be selected for editing, but their execution requires language runners on the backend.</p>
+        <p className="bz-daily-runtime-note">The challenge changes automatically by date. You can use Java, C, C++, Python or JavaScript; other languages can be selected for editing, but their execution requires language runners on the backend.</p>
       </section>
   );
 }

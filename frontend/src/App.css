@@ -2843,3 +2843,87 @@ body,
     gap: 10px !important;
   }
 }
+
+
+/* ==========================================================
+   AI ASSISTANT — 100% DESKTOP SCALE + RESPONSIVE WORKSPACE
+   Scoped only to the AI Assistant page.
+   ========================================================== */
+.lc-ai-assistant {
+  width: 100%;
+  min-width: 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.lc-ai-assistant > header { gap: 18px; }
+.lc-ai-assistant > header h1 { font-size: clamp(1.65rem, 2vw, 2rem) !important; line-height: 1.2 !important; }
+.lc-ai-assistant > header p { font-size: 14px !important; line-height: 1.55 !important; }
+.lc-ai-assistant > header button { min-height: 42px; font-size: 13px !important; }
+
+.lc-ai-assistant > .relative.grid {
+  grid-template-columns: minmax(245px, 280px) minmax(0, 1fr) !important;
+  align-items: stretch;
+  gap: 18px !important;
+}
+.lc-ai-assistant aside { gap: 16px !important; }
+.lc-ai-assistant aside > button { min-height: 46px; font-size: 14px !important; }
+.lc-ai-assistant aside section { padding: 18px !important; }
+.lc-ai-assistant aside h2 { font-size: 16px !important; }
+.lc-ai-assistant aside h3 { font-size: 15px !important; }
+.lc-ai-assistant aside p { font-size: 13px !important; line-height: 1.65 !important; }
+.lc-ai-assistant aside button span { font-size: 13px !important; }
+
+.lc-ai-assistant > .relative.grid > section {
+  height: clamp(600px, calc(100dvh - 190px), 980px) !important;
+  min-height: 600px !important;
+  border-radius: 18px !important;
+}
+.lc-ai-assistant > .relative.grid > section > div:first-child { min-height: 76px; padding: 16px 22px !important; }
+.lc-ai-assistant > .relative.grid > section > div:first-child h2 { font-size: 16px !important; }
+.lc-ai-assistant > .relative.grid > section > div:first-child p { font-size: 13px !important; }
+
+.lc-ai-assistant > .relative.grid > section > div[aria-live="polite"] {
+  padding: clamp(18px, 2vw, 28px) !important;
+  gap: 24px !important;
+}
+.lc-ai-assistant [aria-live="polite"] article { gap: 12px !important; }
+.lc-ai-assistant [aria-live="polite"] article > div:nth-child(2) { max-width: 94%; }
+.lc-ai-assistant [aria-live="polite"] article > div:nth-child(2) > div:first-child { padding: 16px 19px !important; }
+.lc-ai-assistant [aria-live="polite"] article p,
+.lc-ai-assistant [aria-live="polite"] article .text-sm { font-size: 15px !important; line-height: 1.75 !important; }
+.lc-ai-assistant [aria-live="polite"] article .text-\[10px\] { font-size: 12px !important; }
+.lc-ai-assistant [aria-live="polite"] pre { font-size: 13px !important; line-height: 1.7 !important; }
+.lc-ai-assistant [aria-live="polite"] pre code { font-size: inherit !important; }
+
+.lc-ai-assistant form { padding: 16px 20px !important; }
+.lc-ai-assistant form > div { padding: 14px 16px !important; border-radius: 16px !important; }
+.lc-ai-assistant form textarea { min-height: 68px !important; max-height: 180px !important; font-size: 15px !important; line-height: 1.6 !important; }
+.lc-ai-assistant form button { min-height: 44px; padding: 0 22px !important; font-size: 14px !important; }
+.lc-ai-assistant form span,
+.lc-ai-assistant form p { font-size: 12px !important; }
+
+@media (min-width: 1500px) {
+  .lc-ai-assistant > .relative.grid { grid-template-columns: minmax(270px, 310px) minmax(0, 1fr) !important; gap: 22px !important; }
+  .lc-ai-assistant > .relative.grid > section { height: clamp(650px, calc(100dvh - 190px), 1050px) !important; }
+}
+
+@media (max-width: 1100px) and (min-width: 768px) {
+  .lc-ai-assistant > .relative.grid { grid-template-columns: minmax(210px, 235px) minmax(0, 1fr) !important; gap: 12px !important; }
+  .lc-ai-assistant > .relative.grid > section { height: clamp(560px, calc(100dvh - 175px), 850px) !important; min-height: 560px !important; }
+  .lc-ai-assistant aside section { padding: 14px !important; }
+  .lc-ai-assistant [aria-live="polite"] article > div:nth-child(2) { max-width: 96%; }
+}
+
+@media (max-width: 767px) {
+  .lc-ai-assistant { font-size: 14px; }
+  .lc-ai-assistant > header h1 { font-size: 1.6rem !important; }
+  .lc-ai-assistant > .relative.grid { display: block !important; }
+  .lc-ai-assistant > .relative.grid > section { height: calc(100dvh - 170px) !important; min-height: 520px !important; }
+  .lc-ai-assistant aside { max-width: min(300px, 86vw); }
+  .lc-ai-assistant > .relative.grid > section > div[aria-live="polite"] { padding: 14px !important; }
+  .lc-ai-assistant [aria-live="polite"] article > div:nth-child(2) { max-width: 90%; }
+  .lc-ai-assistant [aria-live="polite"] article > div:nth-child(2) > div:first-child { padding: 13px 14px !important; }
+  .lc-ai-assistant form { padding: 10px !important; }
+  .lc-ai-assistant form textarea { min-height: 60px !important; }
+}

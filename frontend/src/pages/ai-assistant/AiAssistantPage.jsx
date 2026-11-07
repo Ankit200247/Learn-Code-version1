@@ -919,7 +919,7 @@ export default function AiAssistantPage({ onNavigate }) {
   );
 
   return (
-    <div className="min-w-0 space-y-5">
+    <div className="lc-ai-assistant min-w-0 space-y-5">
       {/* Page header */}
       <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div className="flex items-center gap-3.5">

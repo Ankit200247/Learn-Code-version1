@@ -51,7 +51,11 @@ const learningDataSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       default: [],
     },
-
+// User's saved code editor files
+savedCodeFiles: {
+  type: mongoose.Schema.Types.Mixed,
+  default: [],
+},
     // Per-field revision counters. They let every device detect when
     // another device saved newer data, so one device never silently
     // overwrites the other device's progress.

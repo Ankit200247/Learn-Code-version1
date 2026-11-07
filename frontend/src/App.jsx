@@ -6757,6 +6757,20 @@ const [isAssistantLoading, setIsAssistantLoading] = useState(false);
 const userStorageKey = currentUser?.id || currentUser?._id || "guest";
   const [loadedUserStorageKey, setLoadedUserStorageKey] = useState(null);
   const [notePadContent, setNotePadContent] = useState("");
+  const [notePadTab, setNotePadTab] = useState("notes");
+const [noteCode, setNoteCode] = useState(
+  'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello World");\n    }\n}'
+);
+const [noteLanguage, setNoteLanguage] = useState("java");
+const [noteCustomInput, setNoteCustomInput] = useState("");
+const [noteOutput, setNoteOutput] = useState("");
+const [noteCodeRunning, setNoteCodeRunning] = useState(false);
+// Saved Code Files
+const [savedCodeFiles, setSavedCodeFiles] = useState([]);
+const [activeCodeFileId, setActiveCodeFileId] = useState(null);
+const [codeFileName, setCodeFileName] = useState("Untitled.java");
+const [codeFilesLoading, setCodeFilesLoading] = useState(false);
+const [codeFileMessage, setCodeFileMessage] = useState("");
   const [dailyCoins, setDailyCoins] = useState(0);
   const [dailyStreak, setDailyStreak] = useState(0);
 
@@ -6786,6 +6800,16 @@ const userStorageKey = currentUser?.id || currentUser?._id || "guest";
       setLoadedUserStorageKey(userStorageKey);
     }
   }, [userStorageKey]);
+
+// Load saved code files whenever Note Pad is opened
+useEffect(() => {
+  if (activePage !== "Note Pad") return;
+
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  fetchSavedCodeFiles();
+}, [activePage, userStorageKey]);
 
   // Keep coins and the current daily-solving streak in sync with saved challenges.
   useEffect(() => {
@@ -7713,6 +7737,181 @@ setActivePage(user.role === "superadmin" ? "Admin Dashboard" : "Dashboard");
     }
   }
 
+// Fetch saved code files from MongoDB
+async function fetchSavedCodeFiles() {
+  try {
+    setCodeFilesLoading(true);
+
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(
+      `${API_URL}/api/learning-data`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const files = response.data.data?.savedCodeFiles || [];
+
+    setSavedCodeFiles(files);
+  } catch (error) {
+    console.error("Failed to load saved code files:", error);
+    setCodeFileMessage("Unable to load saved files.");
+  } finally {
+    setCodeFilesLoading(false);
+  }
+}
+
+async function saveCodeFile() {
+  if (!noteCode.trim()) {
+    setCodeFileMessage("Please write some code first.");
+    return;
+  }
+
+  const fileName = codeFileName.trim();
+
+  if (!fileName) {
+    setCodeFileMessage("Please enter a file name.");
+    return;
+  }
+
+  const existingFile = savedCodeFiles.find(
+    (file) => file.id === activeCodeFileId
+  );
+
+  const newFile = {
+    id: activeCodeFileId || crypto.randomUUID(),
+    name: fileName,
+    code: noteCode,
+    language: noteLanguage,
+    input: noteCustomInput,
+    updatedAt: new Date().toISOString(),
+  };
+
+  const updatedFiles = existingFile
+    ? savedCodeFiles.map((file) =>
+        file.id === activeCodeFileId ? newFile : file
+      )
+    : [...savedCodeFiles, newFile];
+
+  try {
+    const token = localStorage.getItem("token");
+
+    await axios.put(
+      `${API_URL}/api/learning-data`,
+      { savedCodeFiles: updatedFiles },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setSavedCodeFiles(updatedFiles);
+    setActiveCodeFileId(newFile.id);
+    setCodeFileMessage("File saved successfully!");
+  } catch (error) {
+    console.error("Save file error:", error);
+    setCodeFileMessage("Unable to save file.");
+  }
+}
+
+// Open selected saved code file
+function openCodeFile(file) {
+  if (!file) return;
+
+  setActiveCodeFileId(file.id);
+  setCodeFileName(file.name);
+  setNoteCode(file.code || "");
+  setNoteLanguage(file.language || "java");
+  setNoteCustomInput(file.input || "");
+  setNoteOutput("");
+
+  setCodeFileMessage(`Opened ${file.name}`);
+  setNotePadTab("code");
+}
+// Delete saved code file
+async function deleteCodeFile(fileId) {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this file?"
+  );
+
+  if (!confirmDelete) return;
+
+  const updatedFiles = savedCodeFiles.filter(
+    (file) => file.id !== fileId
+  );
+
+  try {
+    const token = localStorage.getItem("token");
+
+    await axios.put(
+      `${API_URL}/api/learning-data`,
+      { savedCodeFiles: updatedFiles },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setSavedCodeFiles(updatedFiles);
+
+    if (activeCodeFileId === fileId) {
+      setActiveCodeFileId(null);
+      setCodeFileName("Untitled.java");
+    }
+
+    setCodeFileMessage("File deleted successfully!");
+  } catch (error) {
+    console.error("Delete file error:", error);
+    setCodeFileMessage("Unable to delete file.");
+  }
+}
+async function runNoteCode() {
+  if (!noteCode.trim()) {
+    setNoteOutput("Please write some code first.");
+    return;
+  }
+
+  setNoteCodeRunning(true);
+  setNoteOutput("Running your code...");
+
+  try {
+    const response = await axios.post(
+      `${API_URL}/api/run`,
+      {
+        code: noteCode,
+        language: noteLanguage,
+        input: noteCustomInput,
+      },
+      { timeout: 30000 }
+    );
+
+    if (response.data.success) {
+      setNoteOutput(
+        response.data.output || "Code executed successfully!"
+      );
+    } else {
+      setNoteOutput(
+        response.data.output ||
+        response.data.error ||
+        "Something went wrong."
+      );
+    }
+  } catch (error) {
+    setNoteOutput(
+      error.response?.data?.message ||
+      (error.code === "ECONNABORTED"
+        ? "Code execution timed out. Please try again."
+        : "Could not connect to the backend.")
+    );
+  } finally {
+    setNoteCodeRunning(false);
+  }
+}
 
 async function runAICodeAssistant() {
   if (!code.trim()) {
@@ -9080,7 +9279,10 @@ const navItems =
                       automaticLayout: true,
                       scrollBeyondLastLine: false,
                       wordWrap: "on",
-                      padding: { top: 16 },
+                     padding: { top: 16 },
+                      stickyScroll: {
+                        enabled: false
+                      },
                     }}
                   />
                   <div className="flex items-center justify-between gap-2 border-t border-slate-200 bg-white px-4 py-3">
@@ -9799,48 +10001,337 @@ const navItems =
             <AdminManagement />
           )}
           {activePage === "Note Pad" && (
-            <section className="mx-auto max-w-5xl space-y-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-2xl font-bold text-slate-900">My Note Pad</h2>
-                  <p className="mt-2 text-sm text-slate-500">
-                    Write down your ideas, study notes, code snippets, and reminders. Your notes save automatically.
-                  </p>
-                </div>
-                <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" /> Auto-save enabled
+  <section className="mx-auto max-w-6xl space-y-5">
+
+    {/* Header */}
+    <div>
+      <h2 className="text-2xl font-bold text-slate-900">
+        My Workspace
+      </h2>
+      <p className="mt-2 text-sm text-slate-500">
+        Write your notes and practice code in one place.
+      </p>
+    </div>
+
+    {/* Tabs */}
+    <div className="flex gap-3 border-b border-slate-200">
+      <button
+        onClick={() => setNotePadTab("notes")}
+        className={`px-5 py-3 text-sm font-semibold border-b-2 transition ${
+          notePadTab === "notes"
+            ? "border-blue-600 text-blue-600"
+            : "border-transparent text-slate-500 hover:text-slate-800"
+        }`}
+      >
+        📝 My Notes
+      </button>
+
+      <button
+        onClick={() => setNotePadTab("code")}
+        className={`px-5 py-3 text-sm font-semibold border-b-2 transition ${
+          notePadTab === "code"
+            ? "border-blue-600 text-blue-600"
+            : "border-transparent text-slate-500 hover:text-slate-800"
+        }`}
+      >
+        💻 Code Editor
+      </button>
+    </div>
+
+    {/* MY NOTES */}
+    {notePadTab === "notes" && (
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+          <div>
+            <h3 className="font-semibold text-slate-800">
+              Personal Notes
+            </h3>
+            <p className="mt-1 text-xs text-slate-400">
+              Your notes are saved automatically.
+            </p>
+          </div>
+
+          <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+            Auto-save enabled
+          </span>
+        </div>
+
+        <textarea
+          value={notePadContent}
+          onChange={(event) =>
+            setNotePadContent(event.target.value)
+          }
+          placeholder="Start writing your notes here...
+
+• Important concepts
+• Interview questions
+• Code snippets
+• Daily learning goals"
+          aria-label="Personal notes"
+          spellCheck={true}
+          className="min-h-[450px] w-full resize-y border-0 bg-white px-5 py-5 text-sm leading-7 text-slate-800 outline-none focus:ring-0"
+        />
+
+        <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50 px-5 py-3">
+          <span className="text-xs text-slate-500">
+            {notePadContent.length.toLocaleString()} characters
+          </span>
+
+          <button
+            type="button"
+            onClick={() => setNotePadContent("")}
+            className="rounded-lg px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+          >
+            Clear Notes
+          </button>
+        </div>
+      </div>
+    )}
+
+    {/* CODE EDITOR */}
+    {notePadTab === "code" && (
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
+
+        {/* LEFT: SAVED FILES PANEL */}
+        <aside className="space-y-4 lg:col-span-3">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="border-b border-slate-200 bg-slate-50 px-4 py-4">
+              <h3 className="font-semibold text-slate-800">My Saved Files</h3>
+              <p className="mt-1 text-xs text-slate-500">
+                Save, open and manage your code files.
+              </p>
+            </div>
+
+            <div className="space-y-3 p-4">
+              <label className="block text-xs font-semibold text-slate-600" htmlFor="note-code-file-name">
+                File name
+              </label>
+              <input
+                id="note-code-file-name"
+                type="text"
+                value={codeFileName}
+                onChange={(event) => setCodeFileName(event.target.value)}
+                placeholder="Enter file name"
+                className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+
+              <button
+                type="button"
+                onClick={saveCodeFile}
+                className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+              >
+                💾 Save File
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveCodeFileId(null);
+                  setCodeFileName(
+                    noteLanguage === "python" ? "Untitled.py" :
+                    noteLanguage === "javascript" ? "Untitled.js" :
+                    noteLanguage === "java" ? "Untitled.java" :
+                    noteLanguage === "c" ? "Untitled.c" : "Untitled.cpp"
+                  );
+                  setNoteCode("");
+                  setNoteCustomInput("");
+                  setNoteOutput("");
+                  setCodeFileMessage("New file created.");
+                }}
+                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                + New File
+              </button>
+
+              {codeFileMessage && (
+                <p className="rounded-lg bg-blue-50 px-3 py-2 text-xs leading-5 text-blue-700" role="status">
+                  {codeFileMessage}
+                </p>
+              )}
+            </div>
+
+            <div className="border-t border-slate-200 p-3">
+              <div className="mb-3 flex items-center justify-between px-1">
+                <h4 className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Saved files
+                </h4>
+                <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-600">
+                  {savedCodeFiles.length}
                 </span>
               </div>
 
-              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3">
-                  <div>
-                    <p className="font-semibold text-slate-800">Personal Notes</p>
-                    <p className="mt-0.5 text-xs text-slate-400">Private to your account</p>
-                  </div>
-                  <span className="text-xs text-slate-400">{notePadContent.length.toLocaleString()} characters</span>
+              {codeFilesLoading ? (
+                <p className="px-2 py-4 text-center text-sm text-slate-500">Loading saved files...</p>
+              ) : savedCodeFiles.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-slate-300 px-3 py-6 text-center">
+                  <p className="text-2xl">📁</p>
+                  <p className="mt-2 text-sm font-medium text-slate-600">No saved files yet</p>
+                  <p className="mt-1 text-xs text-slate-400">Your saved programs will appear here.</p>
                 </div>
-                <textarea
-                  value={notePadContent}
-                  onChange={(event) => setNotePadContent(event.target.value)}
-                  placeholder="Start writing your notes here...&#10;&#10;You can save:&#10;• Important concepts&#10;• Interview questions&#10;• Code snippets&#10;• Daily learning goals"
-                  aria-label="Personal note pad"
-                  spellCheck="true"
-                  className="min-h-[60vh] w-full resize-y border-0 bg-white px-5 py-5 text-sm leading-7 text-slate-800 outline-none placeholder:text-slate-400 focus:ring-0"
-                />
-                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-slate-50 px-5 py-3 text-xs text-slate-500">
-                  <span>Notes are saved automatically as you type.</span>
-                  <button
-                    type="button"
-                    onClick={() => setNotePadContent("")}
-                    className="rounded-lg px-3 py-2 font-semibold text-red-600 transition hover:bg-red-50"
-                  >
-                    Clear notes
-                  </button>
+              ) : (
+                <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+                  {savedCodeFiles.map((file) => (
+                    <div
+                      key={file.id}
+                      className={`flex items-center gap-2 rounded-xl border p-2.5 transition ${
+                        activeCodeFileId === file.id
+                          ? "border-blue-300 bg-blue-50"
+                          : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => openCodeFile(file)}
+                        className="min-w-0 flex-1 text-left"
+                        title={`Open ${file.name}`}
+                      >
+                        <span className="block truncate text-sm font-semibold text-slate-800">
+                          📄 {file.name}
+                        </span>
+                        <span className="mt-1 block text-[11px] font-medium uppercase text-slate-500">
+                          {file.language || "code"}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteCodeFile(file.id)}
+                        aria-label={`Delete ${file.name}`}
+                        title="Delete file"
+                        className="shrink-0 rounded-lg px-2 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
                 </div>
+              )}
+            </div>
+          </div>
+        </aside>
+
+        {/* RIGHT: CODE EDITOR AND RUN OUTPUT */}
+        <div className="min-w-0 space-y-4 lg:col-span-9">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <h3 className="font-semibold text-slate-800">Online Code Editor</h3>
+                <p className="mt-1 truncate text-xs text-slate-500">
+                  {codeFileName || "Untitled"} · Write and run your code here.
+                </p>
               </div>
-            </section>
-          )}
+              <label className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                Language
+                <select
+                  value={noteLanguage}
+                  onChange={(event) => {
+                    const language = event.target.value;
+                    setNoteLanguage(language);
+                    setActiveCodeFileId(null);
+                    const templates = {
+                      java: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello World");\n    }\n}',
+                      python: 'print("Hello World")',
+                      javascript: 'console.log("Hello World");',
+                      c: '#include <stdio.h>\n\nint main() {\n    printf("Hello World");\n    return 0;\n}',
+                      cpp: '#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello World";\n    return 0;\n}'
+                    };
+                    setNoteCode(templates[language] || "");
+                    setCodeFileName(
+                      language === "python" ? "Untitled.py" :
+                      language === "javascript" ? "Untitled.js" :
+                      language === "java" ? "Untitled.java" :
+                      language === "c" ? "Untitled.c" : "Untitled.cpp"
+                    );
+                    setNoteOutput("");
+                  }}
+                  className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-blue-500"
+                >
+                  <option value="java">Java</option>
+                  <option value="c">C</option>
+                  <option value="cpp">C++</option>
+                  <option value="python">Python</option>
+                  <option value="javascript">JavaScript</option>
+                </select>
+              </label>
+            </div>
+
+            <div className="overflow-hidden bg-[#1e1e1e]">
+              <div className="flex items-center justify-between border-b border-slate-700 px-4 py-2.5">
+                <span className="text-xs font-medium text-slate-300">
+                  main.{noteLanguage === "python" ? "py" : noteLanguage === "javascript" ? "js" : noteLanguage === "java" ? "java" : noteLanguage === "c" ? "c" : "cpp"}
+                </span>
+                <span className="text-xs text-slate-400">Monaco Editor</span>
+              </div>
+              <Editor
+                key={noteLanguage}
+                height="480px"
+                language={noteLanguage}
+                theme="vs-dark"
+                value={noteCode}
+                onChange={(value) => setNoteCode(value || "")}
+                onMount={(editor) => {
+                  editor.revealLine(1);
+                  editor.setScrollTop(0);
+                }}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 15,
+                  automaticLayout: true,
+                  scrollBeyondLastLine: false,
+                  wordWrap: "on",
+                  tabSize: 4,
+                  padding: { top: 12, bottom: 12 },
+                  scrollbar: { vertical: "auto", horizontal: "auto" },
+                  lineNumbers: "on",
+                  folding: true,
+                  renderLineHighlight: "line"
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            {/* Custom Input */}
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="border-b border-slate-200 px-4 py-3">
+                <h4 className="font-semibold text-slate-800">Custom Input</h4>
+                <p className="mt-1 text-xs text-slate-500">Provide input for your program (optional).</p>
+              </div>
+              <textarea
+                value={noteCustomInput}
+                onChange={(event) => setNoteCustomInput(event.target.value)}
+                placeholder="Enter your input here..."
+                className="min-h-[150px] w-full resize-y border-0 bg-white p-4 text-sm text-slate-800 outline-none focus:ring-0"
+              />
+            </div>
+
+            {/* Output */}
+            <div className="overflow-hidden rounded-2xl border border-slate-700 bg-[#1e1e1e] shadow-sm">
+              <div className="flex items-center justify-between border-b border-slate-700 px-4 py-3">
+                <h4 className="font-semibold text-slate-200">Output</h4>
+                <span className="text-xs text-slate-400">Program result</span>
+              </div>
+              <pre className="min-h-[150px] whitespace-pre-wrap break-words p-4 text-sm leading-6 text-green-400">
+                {noteOutput || "Your program output will appear here..."}
+              </pre>
+            </div>
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={runNoteCode}
+              disabled={noteCodeRunning}
+              className="rounded-xl bg-blue-600 px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {noteCodeRunning ? "Running..." : "▶ Run Code"}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+  </section>
+)}
 
           {activePage === "AI Assistant" && (
   <AiAssistantPage
